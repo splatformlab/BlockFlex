@@ -11,13 +11,13 @@ export PARACRASH_PATH=$HOME/ParaCrash
 ## 2. Trace Analysis
 Figure 1:
 We use the Alibaba Cloud Traces [1] for Figure 1. 
-Since the traces are quite large to test, you can download a subset we use here (TODO LINK)
+Since the traces are quite large, to test, you can download a subset we use here:(TODO LINK)
 Then run 
 ```shell
 python3 container_parser.py && python3 ali_container_usage.py
-python machine_parser.py && python3 ali_machine_usage.py
+python3 machine_parser.py && python3 ali_machine_usage.py
 ```
-The output are Figures 1a. and 1b. respectively.
+This will create Figures 1a and 1b.
 
 
 
