@@ -3,16 +3,19 @@
 BlockFlex is out learning-based storage harvesting framework, which can harvest flash-based storage resources at fine-grained granularity in modern clould platforms.
 
 ## 1. Overview
+The following packages are necessary to install before running the following scripts.
 ```shell
-# TODO FIXME 
-export PARACRASH_PATH=$HOME/ParaCrash
+sudo apt update
+sudo apt install ...
 ```
 
 ## 2. Trace Analysis
 Figure 1:
 We use the Alibaba Cloud Traces [1] for Figure 1. 
-Since the traces are quite large, to test, you can download a subset we use here:(TODO LINK)
-Then run 
+For plotting container utilization we sample 30000 containers which can be downloaded from the following link: (TODO LINK)
+The results for the container are the same regardless if you use our file or the original container_usage.csv from Alibaba.
+For plotting machine utilization, we use the full machine_usage.csv trace from Alibaba.
+Finally, run the following:
 ```shell
 python3 container_parser.py && python3 ali_container_usage.py
 python3 machine_parser.py && python3 ali_machine_usage.py

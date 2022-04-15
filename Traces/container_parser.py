@@ -20,8 +20,6 @@ total = {}
 count = {}
 ids = set()
 max_size = 30000
-n_machines = 6
-cur_machine = ""
 
 with open(FILE,'r') as infile:
     for line in infile:
