@@ -13,10 +13,9 @@ pip install gdown
 
 ## 2. Trace Analysis
 ### a. Figure 1
-Figure 1:
 We use the Alibaba Cloud Traces[1] for Figure 1.
 
-For plotting container utilization we sample 30000 containers which can be downloaded from the following link: (https://drive.google.com/file/d/1_fz891WPVBih0woOdu-dn3LU6NH1gOIR/view?usp=sharing) The results for the container are the same regardless if you use our file or the original container_usage.csv from Alibaba. If you use container_usage.csv, you will need to modify the first line of the script accordingly. 
+For plotting container utilization we sample 30,000 containers.  The results for the container plot are the same regardless if you use our parsed file or the original container_usage.csv from Alibaba. If you use container_usage.csv, you will need to modify the first line of the script accordingly. 
 
 For plotting machine utilization, we use the full machine_usage.csv trace from Alibaba.
 Finally, run the following (should take under 10 minutes):
@@ -25,11 +24,11 @@ Finally, run the following (should take under 10 minutes):
 gdown 1JMTT2CyMB_dyA86OfNwTPZUd2PhTX4ZW
 #Creates the input file to the next command (ali_container_usage.dat)
 python3 container_parser.py 
-#Plot the container utilization
+#Plot the container utilization (creates ali_container_usage.pdf)
 python3 ali_container_usage.py
 #Creates the input file to the next command (ali_machine_usage.dat)
 python3 machine_parser.py 
-#Plot the machine utilization
+#Plot the machine utilization (creates ali_machine_usage.pdf)
 python3 ali_machine_usage.py
 ```
 This will create Figures 1a and 1b in ali_container_usage.pdf and ali_machine_usage.pdf.
@@ -37,8 +36,9 @@ This will create Figures 1a and 1b in ali_container_usage.pdf and ali_machine_us
 ### b. Figure 2
 We use Google's open source cluster traces[2] for Figure 2.
 
-TODO (put this in an expandable tab?)
-(Optional) We will include the process to derive the results from scratch the same we did here. It is faster to use the intermediate data files we provide below.
+<details>
+<summary>We will include the process to derive the results from scratch the same we did here. It is faster to use the intermediate data files we provide below.</summary>
+<br>
 
 First, follow the instructions in [2] to download the full dataset.
 ```shell
@@ -54,6 +54,7 @@ python3 usage_parser.py
 cp parsed_all_prio_events.csv ../../
 cp usages_500.csv ../../
 ```
+</details>
 
 Alternatively, use the provided parsed_all_prio_events.csv and download usages_500.csv:
 ```shell
