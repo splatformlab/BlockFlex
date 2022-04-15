@@ -37,7 +37,6 @@ for line in infile:
 outfile = open("ali_machine_usage.dat", 'w')
 out_list = []
 for key, v in sorted(total.items()):
-    #print(f"{key} {total[key]/count[key]} {min_util[key]} {max_util[key]}", file=outfile)
     out_list.append(total[key]/count[key])
 print(",".join(map(str, out_list)),file=outfile)
 outfile.close()
