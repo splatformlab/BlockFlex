@@ -11,7 +11,7 @@ sudo apt install ...
 pip install gdown
 ```
 
-## 2. Trace Analysis
+## 2. Trace Analysis (Motivation)
 ### Figure 1
 We use the Alibaba Cloud Traces[1] for Figure 1.
 
@@ -77,11 +77,13 @@ The final output is stored in google_util_cdf.pdf
 Ommitted due to business confidentiality
 
 ### Figure 4
-Make a change here
+TODO JINGHAN
 
 ### Figure 5
 Ommitted due to business confidentiality
 
+### Figure 6 
+Ommitted due to business confidentiality
 
 ## 3. Predictor Analysis
 
@@ -91,4 +93,5 @@ Ommitted due to business confidentiality
 
 ## 5. Sources
 [1]. https://github.com/alibaba/clusterdata/blob/master/cluster-trace-v2018/trace_2018.md
+
 [2]. https://github.com/google/cluster-data/blob/master/ClusterData2011_2.md
