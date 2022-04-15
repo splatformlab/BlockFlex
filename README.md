@@ -92,6 +92,5 @@ Ommitted due to business confidentiality
 
 
 ## 5. Sources
-[1]. https://github.com/alibaba/clusterdata/blob/master/cluster-trace-v2018/trace_2018.md
-
+[1]. https://github.com/alibaba/clusterdata/blob/master/cluster-trace-v2018/trace_2018.md  
 [2]. https://github.com/google/cluster-data/blob/master/ClusterData2011_2.md

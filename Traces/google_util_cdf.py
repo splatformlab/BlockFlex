@@ -9,7 +9,6 @@ import os
 
 plt.rcParams.update({'font.family': 'serif'})
 
-
 avg = []
 peak = []
 mins = []
@@ -58,12 +57,9 @@ Graph.set_xticklabels(labels,fontsize=7)
 Graph.xaxis.set_ticks_position('none')
 Graph.set_xlabel('Percentage of VMs (%)', fontsize=7)
 
-
 YTicks = Xticks
 Graph.set_yticks(YTicks)
-#What are the action labels?
 Graph.set_yticklabels(labels,fontsize=7)
-#Where are the ticks?
 Graph.yaxis.set_ticks_position('none')
 
 Graph.set_axisbelow(True)
