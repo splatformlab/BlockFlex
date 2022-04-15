@@ -12,7 +12,7 @@ pip install gdown
 ```
 
 ## 2. Trace Analysis
-### a. Figure 1
+### Figure 1
 We use the Alibaba Cloud Traces[1] for Figure 1.
 
 For plotting container utilization we sample 30,000 containers.  The results for the container plot are the same regardless if you use our parsed file or the original container_usage.csv from Alibaba. If you use container_usage.csv, you will need to modify the first line of the script accordingly. 
@@ -34,7 +34,7 @@ python3 ali_machine_usage.py
 ```
 This will create Figures 1a and 1b in ali_container_usage.pdf and ali_machine_usage.pdf.
 
-### b. Figure 2
+### Figure 2
 We use Google's open source cluster traces[2] for Figure 2.
 
 <details>
@@ -72,6 +72,15 @@ python3 google_util_parser.py
 python3 google_util_cdf.py
 ```
 The final output is stored in google_util_cdf.pdf
+
+### Figure 3
+Ommitted due to business confidentiality
+
+### Figure 4
+Make a change here
+
+### Figure 5
+Ommitted due to business confidentiality
 
 
 ## 3. Predictor Analysis
