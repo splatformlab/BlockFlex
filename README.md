@@ -9,6 +9,16 @@ export PARACRASH_PATH=$HOME/ParaCrash
 ```
 
 ## 2. Trace Analysis
+Figure 1:
+We use the Alibaba Cloud Traces [1] for Figure 1. 
+Since the traces are quite large to test, you can download a subset we use here (TODO LINK)
+Then run 
+```shell
+python3 container_parser.py && python3 ali_container_usage.py
+python machine_parser.py && python3 ali_machine_usage.py
+```
+The output are Figures 1a. and 1b. respectively.
+
 
 
 ## 3. Predictor Analysis
@@ -16,3 +26,6 @@ export PARACRASH_PATH=$HOME/ParaCrash
 
 ## 4. BlockFlex
 
+
+## 5. Sources
+[1]. https://github.com/alibaba/clusterdata/blob/master/cluster-trace-v2018/trace_2018.md
