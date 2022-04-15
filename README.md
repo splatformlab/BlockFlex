@@ -20,8 +20,9 @@ For plotting container utilization we sample 30,000 containers.  The results for
 For plotting machine utilization, we use the full machine_usage.csv trace from Alibaba.
 Finally, run the following (should take under 10 minutes):
 ```shell
-#Grab the smaller container file (~200 MB)
+# (Optional) Grab the smaller container file (~200 MB)
 gdown 1JMTT2CyMB_dyA86OfNwTPZUd2PhTX4ZW
+gunzip container_usage_sub.csv.gz
 #Creates the input file to the next command (ali_container_usage.dat)
 python3 container_parser.py 
 #Plot the container utilization (creates ali_container_usage.pdf)
@@ -37,7 +38,7 @@ This will create Figures 1a and 1b in ali_container_usage.pdf and ali_machine_us
 We use Google's open source cluster traces[2] for Figure 2.
 
 <details>
-<summary>We will include the process to derive the results from scratch the same we did here. It is faster to use the intermediate data files we provide below.</summary>
+<summary>We will include the process to derive the results from scratch in this dropdown. It is faster to use the intermediate data files we provide below.</summary>
 <br>
 
 First, follow the instructions in [2] to download the full dataset.
@@ -59,7 +60,8 @@ cp usages_500.csv ../../
 Alternatively, use the provided parsed_all_prio_events.csv and download usages_500.csv:
 ```shell
 #Download usages_500.csv
-gdown (TODO)
+gdown 1maec7UF_6U8kMIHRGDpbPvTaqp6QrMxb
+gunzip usages_500.csv.gz
 ```
 Next, compute the cdf for utilization in the google trace:
 (Takes under 25 minutes)
