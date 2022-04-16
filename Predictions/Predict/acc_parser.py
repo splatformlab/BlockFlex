@@ -2,9 +2,7 @@ import os,sys,re
 
 #This shoud process all possible sized values and print results
 
-#BASE= "/home/breidys2/ml_res/outputs/"
-#OUT_FILE="/home/breidys2/ml_res/ml_outputs.txt"
-BASE= "/home/js39/ml_res/outputs/"
+BASE= "/home/breidys2/Research/Codes/BlockFlex/Predictions/Predict/outputs/"
 OUT_FILE="/home/js39/ml_res/ml_outputs.txt"
 if len(sys.argv) > 1:
     DIR = BASE+sys.argv[1]+"/"
@@ -13,9 +11,8 @@ else:
     print("Need to specify a directory")
     exit()
 
-#windows = [60, 120, 180, 240, 300, 360, 420, 480, 540, 600]
 windows = [180]
-buffers = [1, 1.05, 1.1, 1.2, 1.5, 2]
+buffers = [1, 1.05, 1.1, 1.2, 1.3, 1.4]
 wls = ["terasort", "ml_prep", "pagerank", "alibaba"]
 test_str = "tmpa"
 if sys.argv[1] == 'sz' or sys.argv[1] == 'dur_sz':
@@ -40,13 +37,9 @@ for filename in os.listdir(DIR):
         for line in f:
             if line.startswith("overpred"):
                 _,o,_,c,_,u = line.replace(',', "").strip().split(" ")
-                #print(str(w) + " " + str(i) + " \n" + str(o) + " " + str(c) + " " + str(u))
                 over[w][i].append(float(o))
                 under[w][i].append(float(u))
                 correct[w][i].append(float(c))
-                #comb_correct[w][i].append(float(c) + float(u))
-                if w == 0:
-                    print(filename + " " + str(float(c) + float(o)))
                 if w < 3 or sys.argv[1][0] != 'd':
                     comb_correct[w][i].append(float(c) + float(o))
                 else:

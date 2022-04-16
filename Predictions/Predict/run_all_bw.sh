@@ -8,7 +8,7 @@ WINDOWS=("1" "1.05" "1.1" "1.2" "1.3" "1.4")
 OUT=/home/breidys2/Research/Codes/BlockFlex/Predictions/Predict/outputs/bw/
 COPY=1
 PRED=1
-ACC=0
+ACC=1
 
 if [ $COPY -gt 0 ]
 then
@@ -19,7 +19,6 @@ then
             for i in {1..5}; do
                 echo "Copying over ${FILE} ${i}"
                 echo $IN
-                #cp "/home/breidys2/harvest_storage/bench_parse/inputs/bw/${FILE}_${j}_${i}_stats" $IN
                 cp "${CP_DIR}${FILE}_${i}_stats" $IN
             done
         done
@@ -36,7 +35,6 @@ then
                 for k in {1..5}; do
                     cnt=$((cnt+1))
                     echo "Running ${FILE} ${i}"
-                    #python3 lstm_bw.py "${IN}/${FILE}_${j}_${i}_stats" $j > "${OUT}/${FILE}_${j}_${i}.out" &
                     python3 lstm_bw.py "${IN}/${FILE}_${i}_stats" $j > "${OUT}/${FILE}_${j}_${cnt}.out" 
                 done
             done
@@ -47,14 +45,13 @@ then
         cnt=0
         mult=0
         for file in ${IN}/c_*.txt; do
-            #for i in {1..5}; do
-            echo $file
-            #echo $cnt
-            python3 lstm_bw_ali.py $file $j > "${OUT}/ali_${j}_${mult}.out" 
-            mult=$((mult+1))
-            #done
+            for i in {1..5}; do
+                echo $file
+                python3 lstm_bw_ali.py $file $j > "${OUT}/ali_${j}_${mult}.out" 
+                mult=$((mult+1))
+            done
             cnt=$((cnt+1))
-            #wait
+            wait
             if [ $cnt == 5 ] 
             then
                 break

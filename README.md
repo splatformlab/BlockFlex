@@ -204,7 +204,9 @@ cd Predict/
  ~/BlockFlex/Predictions/Predict/outputs/bw   
  ~/BlockFlex/Predictions/Prep/inputs/bw   
  respectively.  
- Each of these scripts can be run stand-alone. They copy the prepared files from the Prep directory into the local inputs. Then, runs the predictor on each 5 times. Then parses and reports the accuracy numbers. The inputs for alibaba and google traces are already in the local input directories and are not copied first.
+Finally, to correctly parse the accuracy numbers, modify the path contained in the BASE variable of acc_parser.py in the same fashion.  
+
+ Each of these scripts can be run stand-alone. They copy the prepared files from the Prep directory into the local inputs. Then, runs the predictor on each 5 times. Then parses and reports the accuracy numbers. The inputs for alibaba and google traces are already in the local input directories and are not copied first. The output files will be under the corresponding outputs directory. The parsed output files will be printed by the scripts but can be retrieved from the outputs directory under PREDICTOR_acc_out.txt (bw_acc_out.txt for bandwidth). If you want to rerun only a part of the script, i.e. only copy files, only run prediction, or only compute and output results, you can modify the variables at the top of the script accordingly.
  
 ```shell
 #First prepare the output directories
@@ -214,16 +216,16 @@ mkdir outputs/sz
 mkdir outputs/dur_bw
 mkdir outputs/dur_sz
 
-#Run the bandwidth predictor
+#Run the bandwidth predictor (takes ~20 minutes)
 ./run_all_bw.sh
 
-#Run the size predictor
+#Run the size predictor (takes ~20 minutes)
 ./run_all_sizing.sh
 
-#Run the bandwidth duration predictor
+#Run the bandwidth duration predictor ()
 ./run_all_dur_bw.sh
 
-#Run the size duration predictor
+#Run the size duration predictor ()
 ./run_all_dur_sizing.sh
 ```
 

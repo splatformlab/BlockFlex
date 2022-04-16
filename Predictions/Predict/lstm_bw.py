@@ -1,31 +1,13 @@
 import torch.nn as nn
 from hwcounter import count, count_end
 import torch
-# import matplotlib
-# matplotlib.use("Agg")
-# import matplotlib.pyplot as plt
 import numpy as np
 import sys
-import sklearn
 import math
 
-#DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 DEVICE = torch.device("cpu")
 
-mode = "train"
-#Possible inputs: ml_prep, terasort, wordcount, hr_pagerank, graphchi page_rank, graphchi_connected comps/randomwalks
-#ML_PREP
-#in_file = "ml_prep_stats"
-#TERASORT
-#in_file = "terasort_stats"
-#WORDCOUNT
-#in_file = "wordcount_stats"
-#PAGERANK (HADOOP)
-#in_file = "hr_pr_stats"
-#PAGERANK (GRAPHCHI)
-#in_file = "pagerank_stats"
-#RANDOMWALKS
-in_file = "randomwalks_stats"
+in_file = "ml_prep_stats"
 
 if len(sys.argv) >= 2:
     in_file = sys.argv[1]
@@ -38,7 +20,6 @@ class LSTM(nn.Module):
         self.input_size = input_size
         self.linear = nn.Linear(hidden_layer_size, output_size)
         self.softmax = nn.Softmax(dim=2)
-        #TODO CHECK THIS
         self.init_hidden(1)
         print(self)
 
@@ -47,17 +28,13 @@ class LSTM(nn.Module):
                             torch.zeros(1,batch_size,self.hidden_layer_size).to(DEVICE))
 
     def forward(self, inputs):
-        # inputs.shape = (seq_length, batch_size)
         features = self.input_size
         batch_size = inputs.shape[0]
         seq_length = inputs.shape[1]
         self.init_hidden(batch_size)
-        #print(inputs.view(seq_length, batch_size, features))
         lstm_out, self.hidden_cell = self.lstm(inputs.view(seq_length, batch_size, features), self.hidden_cell)
         predictions = self.linear(lstm_out.view(seq_length, batch_size, self.hidden_layer_size))
-        #TODO TESTING SOFTMAX
         predictions = self.softmax(predictions)
-        #print(inputs.shape, predictions.shape, predictions[-1][-1].shape)
         return predictions[-1]
 
 
@@ -65,7 +42,6 @@ class LSTM(nn.Module):
 def train_online(model, train_sequence, batch_size=1):
     num_batches = len(train_sequence)//batch_size
     print(f"Total batches {num_batches}")
-    print_gran = 200
     pred = []
     variation =0
     correct = 0
@@ -85,21 +61,15 @@ def train_online(model, train_sequence, batch_size=1):
         list_inputs, list_labels = list(zip(*batch_seq))
         inputs = torch.stack(list_inputs)
         labels = torch.stack(list_labels)
-        #print(labels)
         start = count()
         model.train()
         optimizer.zero_grad()
-        #outputs = model(inputs)
         #This seems to be needed in order to make the dimensions match, its just a dummy dimension
         outputs = torch.unsqueeze(model(inputs), 0)
-        #outputs = torch.floor(outputs) + 1
 
         if torch.argmax(outputs) < torch.argmax(labels):
             train_label = torch.zeros(1,1,channels)
             train_label[0][0][min(15,torch.argmax(labels)+1)] = 1
-            #print("underpred")
-            #print(train_label)
-            #print(labels)
             single_loss = loss_function(outputs, labels)
             single_loss.backward()
             optimizer.step()
@@ -110,15 +80,10 @@ def train_online(model, train_sequence, batch_size=1):
             optimizer.step()
         else:
             single_loss = loss_function(outputs, labels)
-            #if j % print_gran == print_gran-1:
-            #    print(f"Single Loss: {single_loss}")
             single_loss.backward()
             optimizer.step()
         train_time += count_end() - start
         train_samples += 1
-        #if j % print_gran == print_gran-1:
-        #    print(f"Single Loss: {single_loss}")
-        #Predict for the next timestep
         model.eval()
         with torch.no_grad():
             if j !=num_batches-1:
@@ -128,14 +93,13 @@ def train_online(model, train_sequence, batch_size=1):
                 labels = torch.stack(list_labels)
                 label_score = torch.argmax(labels)
                 start = count()
-                #tag_score = model(inputs)
                 tag_score = torch.argmax(model(inputs))
                 pred_time += count_end() - start
                 buf_score = int(math.ceil(tag_score * buf))
                 if buf_score >= channels:
                     buf_score = channels-1
                 pred_samples += 1
-                print(f"Pred: {tag_score}, buffer: {buf_score}, label: {label_score}")
+                #print(f"Pred: {tag_score}, buffer: {buf_score}, label: {label_score}")
                 if label_score < tag_score:
                     if total >= warmup: 
                         above += 1
@@ -148,52 +112,26 @@ def train_online(model, train_sequence, batch_size=1):
                     if total >= warmup: 
                         correct += 1
                 total += 1
-                #pred.append(tag_score.cpu().detach().numpy())
                 variation += abs(tag_score - labels)
     total-=warmup
     print(f"overpred: {above/total}, correct: {correct/total}, underpred: {below/total}")
     print(f"avg_overpred: {o_pred_sum} {above}")
     print(f"avg_underpred: {u_pred_sum} {below}")
     #print(f"time per: {(end-start)/(num_batches)}")
-    #print("avg_variation ", variation/len(train_sequence))
-    return pred
-    #checkpoint = {'model':model, 
-    #        'state_dict': model.state_dict(),
-    #        'optimizer':optimizer.state_dict()}
-    #torch.save(checkpoint, 'checkpoint')
-
-
-def test(model, test_seq):
-    #Test what the scores are after training
-    variation = 0
-    pred = []
-    model.eval()
-    with torch.no_grad():
-        for i, (seq,label) in enumerate(test_seq):
-            tag_score = model(seq.unsqueeze(0))
-            #TODO
-            pred.append(tag_score.cpu().detach().numpy()[0])
-            variation += abs(tag_score - label)
-    print("avg_variation ", variation/len(test_seq))
     return pred
 
 def preprocessing(input_data, win):
     inout_seq = []
     L = len(input_data)
     lookahead = 0
-    #tfile = open(in_file + "checking.txt", 'w')
     for i in range(L-win-lookahead):
         #sends in the input bandwidths for the window length
         train_seq = torch.FloatTensor(input_data[i:i+win]).to(DEVICE)
         train_label= torch.FloatTensor(input_data[i+win+lookahead:i+win+lookahead+1]).to(DEVICE)
         #See the input format below, pulling out the sum_tot_bw
-        #temp_label = torch.split(train_label, 1, dim=1)[14]
-        ###TESTING FEWER INPUTS
         temp_label = torch.split(train_label, 1, dim=1)[4]
         train_label = torch.zeros(1,channels)
-        #print(temp_label[0][0], file=tfile)
         train_label[0][min(int(temp_label[0][0]),15)] = 1.0
-        #TODO TEMP
         train_seq/=16
         inout_seq.append((train_seq, train_label))
     return inout_seq
@@ -211,8 +149,6 @@ def read_input(in_file):
     with open(in_file, "r") as f:
         for line in f:
             temp = line.split(",")
-            #input_data.append([float(total)/MB, float(read)/MB, float(write)/MB])
-            #input_data.append([float(total)/MB, int(float(total)/MB/channel_bw)])
             for i in range(len(temp)):
                 temp[i] = float(temp[i])
                 if i % 6 < 3:
@@ -222,10 +158,7 @@ def read_input(in_file):
                 else:
                     #Also normalize the iops
                     temp[i] = int(temp[i]/iops_chl) + 1
-            #input_data.append(temp)
-            ###TESTING SOME STUFF
             #Testing max, min, avg for bw, iops
-            #TODO check normalization?
             add_list = [temp[2], temp[5], temp[8], temp[11], temp[14], temp[17]]
             input_data.append(add_list)
     return input_data
@@ -252,27 +185,15 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.005)
 loss_function = nn.MSELoss()
 #Pull the sequence of total/r/w bws from the stats file
 input_data = read_input(in_file)
-with open("testshm.txt", 'w') as f:
-    for vals in input_data:
-        print(",".join(map(str,vals)), file=f)
 
 input_seq = preprocessing(input_data, window)
-with open("testshm_prep.txt", 'w') as f:
-    for vals in input_seq:
-        print(",".join(map(str,vals)), file=f)
 
 #init lstm
 
 num_samples = len(input_seq)
 print(f"num_samples: {num_samples}")
 
-pred_online=[]
-if mode == "train":
-    pred_online = train_online(model, input_seq, batch_size=batch_size)
-    #pred_online = train(model, input_seq[:num_samples//2], batch_size=batch_size)
-elif mode == "test":
-    checkpoint = torch.load("checkpoint", map_location=DEVICE)
-    model.load_state_dict(checkpoint['state_dict'])
+pred_online = train_online(model, input_seq, batch_size=batch_size)
 
 #Adjust for cycle overhead of the tracking itself
 train_over_adjusted = train_time - (train_samples * cyc_overhead)
@@ -282,35 +203,8 @@ pred_over_adjusted/=pred_samples
 print(f"Training Overhead: Samples: {train_samples} Time: {train_time} Per: {train_over_adjusted}")
 print(f"Prediction Overhead: Samples: {pred_samples} Time: {pred_time} Per: {pred_over_adjusted}")
 
-'''
-plot_input = []
-deb_output = []
-plot_channel = []
-for inp in input_data:
-    plot_input.append(inp[14])
-    deb_output.append(str(inp[14]) + " " + str(inp[17]))
-
-with open(in_file+"_deb", 'w') as f:
-    print("\n".join(map(str,plot_input)), file=f)
-#    print(",".join(map(str,pred_online)), file=f)
-
-#TODO
-#window = 0
-plt.plot(np.arange(len(plot_input)), plot_input, label='input')
-#plt.plot(np.arange(0, num_samples//2)+window, pred_train)
-#tot,read,write = list(zip(*pred_test))
-#tot = list(zip(*pred_test))
-'''
 checkpoint = {'model':model, 
         'state_dict': model.state_dict(),
         'optimizer':optimizer.state_dict()}
 torch.save(checkpoint, 'bw_size.model')
 
-'''
-plt.plot(np.arange(len(pred_online))+window, pred_online, label='pred')
-plt.xlabel("Time (s)")
-plt.ylabel("Number of Channels")
-plt.legend()
-plt.gca().set_ylim(ymin=0)
-plt.savefig(f"{in_file}.png")
-'''
