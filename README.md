@@ -199,7 +199,8 @@ cd Predict/
  ~/BlockFlex/Predictions/Prep/inputs/bw   
  respectively.  
  Each of these scripts can be run stand-alone. They copy the prepared files from the Prep directory into the local inputs. Then, runs the predictor on each 5 times. Then parses and reports the accuracy numbers. The inputs for alibaba and google traces are already in the local input directories and are not copied first.
- ```shell
+ 
+```shell
 #First prepare the output directories
 mkdir outputs
 mkdir outputs/bw
@@ -218,8 +219,7 @@ mkdir outputs/dur_sz
 
 #Run the size duration predictor
 ./run_all_bw.sh
-
- ```
+```
 
 ## 4. BlockFlex
 
