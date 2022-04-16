@@ -76,8 +76,6 @@ python3 google_util_cdf.py
 ```
 The final output is stored in google_util_cdf.pdf
 
-### Figure 3
-Ommitted due to business confidentiality
 
 ### Figure 4
 We use the Alibaba Cloud Traces[1] for Figure 4.
@@ -95,13 +93,6 @@ python3 ali_harvesting_bar.py
 ```
 This will create Figures 4 in ali_harvesting_bar.pdf.
 
-
-### Figure 5
-Ommitted due to business confidentiality
-
-### Figure 6 
-Ommitted due to business confidentiality
-
 ### Figure 15
 ```shell
 # Grab the low priority container file (Utilizations/low_prio_vm_times_reparse.txt)
@@ -117,7 +108,7 @@ python3 ali_improved_util_cdf.py
 python3 alibaba_improved_util.py
 ```
 
-### Figure 17
+### Figure 3, Figure 5, Figure 6, and Figure 17
 Ommitted due to business confidentiality
 
 ## 3. Predictor Analysis
