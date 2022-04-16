@@ -20,7 +20,7 @@ For plotting container utilization we sample 30,000 containers.  The results for
 For plotting machine utilization, we use the full machine_usage.csv trace from Alibaba.
 Finally, run the following (should take under 10 minutes):
 ```shell
-# (Optional) Grab the smaller container file (~200 MB)
+# (Optional) Grab the smaller container file (~1.3 GB)
 gdown 1JMTT2CyMB_dyA86OfNwTPZUd2PhTX4ZW
 gunzip container_usage_sub.csv.gz
 #Creates the input file to the next command (ali_container_usage.dat)
@@ -59,7 +59,7 @@ cp usages_500.csv ../../
 
 Alternatively, use the provided parsed_all_prio_events.csv and download usages_500.csv:
 ```shell
-#Download usages_500.csv
+#Download usages_500.csv (~60GB)
 gdown 1maec7UF_6U8kMIHRGDpbPvTaqp6QrMxb
 gunzip usages_500.csv.gz
 ```
@@ -86,6 +86,58 @@ Ommitted due to business confidentiality
 Ommitted due to business confidentiality
 
 ## 3. Predictor Analysis
+The prediction directory contains some parsed traces of workloads, the predictors themselves as well as the scripts for plotting the accuracy measurements.
+
+We begin by fetching the traces and preparing the inputs for the predictors. 
+We include how each trace was produced in the following dropdowns:  
+<details>
+<summary>Alibaba/Google</summary>
+<br>
+</details>
+<details>
+<summary>terasort</summary>
+We install hadoop-3-3 using the hadoop documentation: https://hadoop.apache.org/docs/r3.3.0/hadoop-project-dist/hadoop-common/SingleCluster.html 
+
+The run_hadoop.sh script provides a reference to how we collect the traces. We generate a 75GB dataset with TeraGen and then sort it with TeraSort. Traces are collected using blktrace. The size information is collected with check.sh which uses the 'du' command to track the size of the hadoop directory.
+<br>
+</details>
+<details>
+<summary>graphchi</summary>
+<br>
+We install graphchi using their git repo: https://github.com/GraphChi/graphchi-cpp
+
+The run_graphchi.sh script provides a reference to how we collect the traces. We use graphchi's sample implementation of pagerank and input the Friendster graph. As with hadoop, the size information is collected with check.sh
+</details>
+<details>
+<summary>ml_prep</summary>
+We download the 2017 ImageNet dataset and repeatedly run simple preprocessing operations to mimic a batch processing of images for ML training. The python file and run_ml_prep.sh are included for reference.
+<br>
+</details>
+
+The preparation scripts mimic the statistic collections of BlockFlex by reporting aggregations across the reporting window. This gives the same set of inputs the predictor would receive if it were receiving inputs from BlockFlex, but in an offline manner.
+
+```shell
+#Enter the prep directory
+cd Prep
+#Download the traces (~TODO GB)
+gdown 1hWZJOKNyumce0UNo45zb3_pfyytwg2YC
+#Unzip them, should have a number of file with the format WORKLOAD_NUM.sizing and WORKLOAD_num.trace
+tar -xzvf traces.tar.gz
+#Run the preparation scripts
+#Should create a set of files with the format WORKLOAD_NUM_stats in the input/bw directory
+./regen_bw.sh
+#Should create a set of files with the format WORKLOAD_NUM_sizing in the input/sz directory
+./regen_size.sh
+#Should create a set of files with the format WORKLOAD_NUM_dur in the input/dur_bw and input/dur_sz directories
+./regen_duration.sh
+#We are done in this directory
+cd ..
+```
+
+Now that we have the inputs prepared, we go into the predictor directory and run them on the inputs
+```shell
+
+```
 
 
 ## 4. BlockFlex
