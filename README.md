@@ -5,10 +5,13 @@ BlockFlex is out learning-based storage harvesting framework, which can harvest 
 ## 1. Overview
 The following packages are necessary to install before running the following scripts.
 ```shell
-sudo apt update
-sudo apt install ...
 #Easy command line download of google drive files
-pip install gdown
+pip3 install gdown
+#Performance analysis of predictors
+pip3 install hwcounter
+#Various useful python packages
+pip3 install numpy, matplotlib,sklearn
+#Install pytorch from this link: https://pytorch.org/get-started/locally/
 ```
 
 ## 2. Trace Analysis
@@ -196,7 +199,8 @@ cd Predict/
  ~/BlockFlex/Predictions/Prep/inputs/bw   
  respectively.  
  Each of these scripts can be run stand-alone. They copy the prepared files from the Prep directory into the local inputs. Then, runs the predictor on each 5 times. Then parses and reports the accuracy numbers. The inputs for alibaba and google traces are already in the local input directories and are not copied first.
- ```shell
+ 
+```shell
 #First prepare the output directories
 mkdir outputs
 mkdir outputs/bw
@@ -215,8 +219,7 @@ mkdir outputs/dur_sz
 
 #Run the size duration predictor
 ./run_all_bw.sh
-
- ```
+```
 
 ## 4. BlockFlex
 You will find two directories under BlockFlex: ocssd/ and blockflex/. Directory ocssd/ contains scripts and code to setup the iSCSI virtual disk environment and virtual machine instances. Directory blockflex/ contains the main repo for the BlockFlex framework. To obtain th bandwidth improvement plots in Figure 18 and 19, please follow the instructions. 
