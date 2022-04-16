@@ -11,7 +11,7 @@ sudo apt install ...
 pip install gdown
 ```
 
-## 2. Trace Analysis (Motivation)
+## 2. Trace Analysis
 ### Figure 1
 We use the Alibaba Cloud Traces[1] for Figure 1.
 
@@ -100,6 +100,24 @@ This will create Figures 4 in ali_harvesting_bar.pdf.
 Ommitted due to business confidentiality
 
 ### Figure 6 
+Ommitted due to business confidentiality
+
+### Figure 15
+```shell
+# Grab the low priority container file (Utilizations/low_prio_vm_times_reparse.txt)
+cd Utilizations
+gdown 18Ea4IvdctyuT4kCA5uj_E6UVEUvvl7wg
+# Parse the low prority VM file to generate harvest VM period and parse the foreground vm file to generate harvestable period. (creates low_prio_vm_hybrid.txt harvest_avail_times.txt)
+python3 ali_parser_harvest.py
+# Match low priority vms to foreground VMs (creates original_util.txt and improved_util.txt)
+javac Matcher.java && java Matcher low_prio_vm_hybrid.txt harvest_avail_times.txt
+# Convert from raw data to Plot data (creates alibaba_improved_util.dat)
+python3 ali_improved_util_cdf.py
+#Plot the improved utilizations
+python3 alibaba_improved_util.py
+```
+
+### Figure 17
 Ommitted due to business confidentiality
 
 ## 3. Predictor Analysis
