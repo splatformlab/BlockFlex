@@ -89,7 +89,7 @@ Ommitted due to business confidentiality
 The prediction directory contains some parsed traces of workloads, the predictors themselves as well as the scripts for plotting the accuracy measurements.
 
 We begin by fetching the traces and preparing the inputs for the predictors. 
-We include how each trace was produced in the following dropdowns:  
+We include how each trace was produced in the following dropdowns and their associated scripts are in Predictions/TraceGen:  
 <details>
 <summary>Alibaba/Google</summary>
 <br>
