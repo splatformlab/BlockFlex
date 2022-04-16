@@ -14,7 +14,7 @@ sudo echo "Success"
 echo "Running workload ${TYPE} and outputting to ${OUT}"
 if [[ $TYPE == "terasort" ]]
 then
-    for RUN in {1..6}; do
+    for RUN in {1..5}; do
         echo "Removing old output"
         hadoop fs -rm -r /user/breidys2/teraoutput
         hadoop fs -rm -r /user/breidys2/terainput
