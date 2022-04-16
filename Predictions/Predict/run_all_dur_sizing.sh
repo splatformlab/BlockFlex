@@ -33,8 +33,7 @@ then
         for FILE in "${WLS[@]}"; do
             for i in {1..5}; do
                 echo "Running ${FILE} ${i}"
-                #python3 lstm_dur_bw.py "${IN}/${FILE}_${j}_${i}_dur" > "${OUT}/${FILE}_${j}_${i}.out" &
-                python3 lstm_dur_bw.py "${IN}/${FILE}_${i}_dur" $j > "${OUT}/${FILE}_${j}_${i}.out" 
+                python3 lstm_dur.py "${IN}/${FILE}_${i}_dur" $j > "${OUT}/${FILE}_${j}_${i}.out" &
             done
             wait
         done
@@ -43,13 +42,13 @@ then
         cnt=0
         mult=0
         for file in ${IN}/*.txt; do
-            #for i in {1..5}; do
-            echo $file
-            echo $cnt
-            python3 lstm_dur_gl.py $file $j > "${OUT}/google_${j}_${mult}.out" 
-            mult=$((mult+1))
-            #done
-            #wait
+            for i in {1..5}; do
+                echo $file
+                #echo $cnt
+                python3 lstm_dur_gl.py $file $j > "${OUT}/google_${j}_${mult}.out" &
+                mult=$((mult+1))
+            done
+            wait
             cnt=$((cnt+1))
             if [ $cnt == 5 ] 
             then

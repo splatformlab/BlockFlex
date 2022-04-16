@@ -36,7 +36,7 @@ then
                 for k in {1..5}; do
                     cnt=$((cnt+1))
                     echo "Running ${FILE} ${i}"
-                    python3 lstm_dur_bw.py "${IN}/${FILE}_${i}_dur" $j > "${OUT}/${FILE}_${j}_${cnt}.out" &
+                    python3 lstm_dur.py "${IN}/${FILE}_${i}_dur" $j > "${OUT}/${FILE}_${j}_${cnt}.out"
                 done
             done
             wait
