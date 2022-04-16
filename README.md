@@ -93,7 +93,9 @@ python3 ali_harvesting_bar.py
 ```
 This will create Figures 4 in ali_harvesting_bar.pdf.
 
-### Figure 15
+### Figure 15 and 16
+We use the Alibaba Cloud Traces[1] for ploting the improved utilization for Figure 15 and Google's open source cluster traces[2] for Figure 16. The low priority VMs are generated from Google as well. 
+
 ```shell
 # Grab the low priority container file (Utilizations/low_prio_vm_times_reparse.txt)
 cd Utilizations
@@ -103,9 +105,18 @@ python3 ali_parser_harvest.py
 # Match low priority vms to foreground VMs (creates original_util.txt and improved_util.txt)
 javac Matcher.java && java Matcher low_prio_vm_hybrid.txt harvest_avail_times.txt
 # Convert from raw data to Plot data (creates alibaba_improved_util.dat)
-python3 ali_improved_util_cdf.py
-#Plot the improved utilizations
+python3 improved_util_cdf.py alibaba
+#Plot the improved utilizations for Alibaba
 python3 alibaba_improved_util.py
+
+# Parse the low prority VM file to generate harvest VM period and parse the foreground vm file to generate harvestable period. (creates low_prio_vm_hybrid.txt harvest_avail_times.txt)
+python3 google_parser_harvest.py
+# Match low priority vms to foreground VMs (creates original_util.txt and improved_util.txt)
+javac Matcher.java && java Matcher low_prio_vm_times_reparse.txt harvest_avail_times.txt
+# Convert from raw data to Plot data (creates google_improved_util.dat)
+python3 improved_util_cdf.py google
+#Plot the improved utilizations for Google
+python3 google_improved_util.py
 ```
 
 ### Figure 3, Figure 5, Figure 6, and Figure 17

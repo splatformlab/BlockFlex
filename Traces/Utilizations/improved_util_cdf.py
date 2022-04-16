@@ -8,11 +8,15 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 import os
+import sys
 
+trace = sys.argv[1]
+
+assert(trace in ['alibaba', 'google'])
 
 plt.rcParams.update({'font.family': 'serif'})
 
-file = "alibaba_improved_util.dat"
+file = f"{trace}_improved_util.dat"
 file1 = "original_util.txt"
 file2 = "improved_util.txt"
 file3 = "harvest_min_max.txt"
