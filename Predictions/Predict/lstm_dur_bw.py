@@ -1,13 +1,9 @@
 import torch.nn as nn
 import torch
 from hwcounter import count, count_end
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 import math
 import numpy as np
 import sys
-import sklearn
 
 
 # Here we now use the sequence of last durations we have hit (5 min increments to predict how much
@@ -15,23 +11,10 @@ import sklearn
 # we actually have a shift.
 #
 windows = [180]
-#windows = [60,120,180,240,300,360,420,480,540,600]
 
-#DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 DEVICE = torch.device("cpu")
 
-mode = "train"
-#Multiple possible in_files based on different containers
-#in_file = "c_100.txt"
-#in_file = "c_10011.txt"
-#in_file = "c_10015.txt"
-#in_file = "c_10006.txt"
-#in_file = "c_10007.txt"
-#in_file = "c_10127.txt"
-#in_file = "c_10024.txt"
 in_file = "c_10005.txt"
-#in_file = "c_102.txt"
-#in_file = "c_10601.txt"
 
 if len(sys.argv) >= 2:
     in_file = sys.argv[1]
@@ -44,31 +27,25 @@ class LSTM(nn.Module):
         self.input_size = input_size
         self.linear = nn.Linear(hidden_layer_size, output_size)
         self.softmax = nn.Softmax(dim=2)
-        #self.init_hidden()
-        #print(self)
 
     def init_hidden(self, batch_size):
         self.hidden_cell = (torch.zeros(1,batch_size,self.hidden_layer_size).to(DEVICE),
                             torch.zeros(1,batch_size,self.hidden_layer_size).to(DEVICE))
 
     def forward(self, inputs):
-        # inputs.shape = (seq_length, batch_size)
         features = self.input_size
         batch_size = inputs.shape[0]
         seq_length = inputs.shape[1]
         self.init_hidden(batch_size)
-        #print(inputs.view(seq_length, batch_size, features))
         lstm_out, self.hidden_cell = self.lstm(inputs.view(seq_length, batch_size, features), self.hidden_cell)
         predictions = self.linear(lstm_out.view(seq_length, batch_size, self.hidden_layer_size))
-        #predictions = self.softmax(predictions)
         return predictions[-1]
 
 
 
-def train_online(model, optimizer, train_sequence, train_bool, epochs=15, batch_size=1, num=1):
+def train_online(model, optimizer, train_sequence, train_bool, batch_size=1, num=1):
     num_batches = len(train_sequence)//batch_size
     print(f"Total batches {num_batches}")
-    print_gran = 200
     pred = []
     variation =0
     correct = 0
@@ -89,9 +66,7 @@ def train_online(model, optimizer, train_sequence, train_bool, epochs=15, batch_
     n_updates = 0
     train_cnt = 0
     for j in range(num_batches):
-        print(train_bool[j])
         if train_bool[j]: 
-            #print("------------------------")
             while prev_train <= j:
                 n_updates += 1
                 batch_seq = train_sequence[prev_train*batch_size:(prev_train+1)*batch_size]
@@ -102,13 +77,9 @@ def train_online(model, optimizer, train_sequence, train_bool, epochs=15, batch_
                 model.train()
                 start = count()
                 optimizer.zero_grad()
-                #out= model(inputs)
                 #This seems to be needed in order to make the dimensions match, its just a dummy dimension
                 out = torch.unsqueeze(model(inputs), 0)
                 single_loss = loss_function(out, labels)
-                #print(f"cur: {cur}, out: {out}, labels: {labels}, single_loss: {single_loss}")
-                #if prev_train % print_gran == print_gran-1:
-                #    print(f"Single Loss: {single_loss}")
                 single_loss.backward()
                 optimizer.step()
                 train_time += count_end() - start
@@ -144,26 +115,11 @@ def train_online(model, optimizer, train_sequence, train_bool, epochs=15, batch_
                     u_pred_sum += label_score_int - buf_score_int
                 else:
                     correct += 1
-                #print(f"{tag_score_int} {label_score_int}")
-                #if n_updates >= 2:
-                #if tag_score_int < label_score_int:
-                #    #print(f"under {tag_score_int} {label_score_int}, bw: {cur}")
-                #    below += 1
-                #    under_g += 1
-                #elif tag_score_int == label_score_int:
-                #    #print(f"correct {tag_score_int} {label_score_int}, bw: {cur}")
-                #    correct += 1
-                #    correct_g +=1 
-                #else:
-                #    #print(f"overpred {tag_score_int} {label_score_int}, bw: {cur}")
-                #    above += 1
-                #    over_g += 1
                 pred.append(tag_score.cpu().detach().numpy()[0])
                 variation += abs(tag_score - labels)
 
     #print(f"overpred: {above/total}, correct: {correct/total}, underpred: {below/total}")
     print("Trained with : " + str(train_cnt))
-    #if num in seen and train_cnt > 5:
     if train_cnt > 5:
         over_g += above
         under_g += below
@@ -177,25 +133,6 @@ def train_online(model, optimizer, train_sequence, train_bool, epochs=15, batch_
         #print("avg_variation ", variation/len(train_sequence))
     print(f"avg_overpred: {o_pred_sum} {above}")
     print(f"avg_underpred: {u_pred_sum} {below}")
-    return pred
-    #checkpoint = {'model':model, 
-    #        'state_dict': model.state_dict(),
-    #        'optimizer':optimizer.state_dict()}
-    #torch.save(checkpoint, 'checkpoint')
-
-
-def test(model, test_seq):
-    #Test what the scores are after training
-    variation = 0
-    pred = []
-    model.eval()
-    with torch.no_grad():
-        for i, (seq,label) in enumerate(test_seq):
-            tag_score = model(seq.unsqueeze(0))
-            #TODO
-            pred.append(tag_score.cpu().detach().numpy()[0])
-            variation += abs(tag_score - label)
-    print("avg_variation ", variation/len(test_seq))
     return pred
 
 
@@ -227,12 +164,9 @@ def read_input(in_file):
             if cnt == 0:
                 continue
             temp = line.split()
-            #print(temp)
             #Need to convert the input time to the nearest half hour
-            #inp_data.append([float(temp[0])/time_alloc, int(float(temp[1]))])
             duration = int(float(temp[0]))
             curbw = int(float(temp[1]))
-            seen.add(curbw-1)
             #Setting up the training for ensuring we have 'i' bandwidth or less
             #This each time we have curbw bandwidth we need to train for all bw < curbw
             #The rest will have their durations extended.
@@ -248,16 +182,10 @@ def read_input(in_file):
                         while cur <= duration:
                             inp_data[i].append([cur/time_alloc])
                             #Shouldn't need to care that we are intermixing since each one is generated seperately
-                            #train_bool[i].append(cur <= rem)
                             train_bool[i].append(True)
                             label_data[i].append([(duration - cur)/time_alloc])
                             #Every interval
                             cur += rem
-                        #inp_data[i].append([duration/time_alloc])
-                        #train_bool[i].append(True)
-                        ##This should not be used anyways
-                        #label_data[i].append([0])
-                        #print(f"{int(float(temp[0])/time_alloc)} {int(float(temp[1]))}")
                 else:
                     hist[i] += duration
                     #Shave off time until we are under 12 hours since this is the max allocation anyways, might as well train with such
@@ -271,32 +199,12 @@ def read_input(in_file):
                         temp_train_val = 0
                         best_train_val = hist[i] / time_alloc
                         while temp_train_val + best_train_val * time_alloc <= hist[i]:
-                            print("Adding vals here" + str(i))
                             inp_data[i].append([temp_train_val/time_alloc])
                             train_bool[i].append(True)
                             label_data[i].append([(hist[i]-temp_train_val)/time_alloc])
                             temp_train_val += rem
 
 
-        #for i in range(channels):
-        #    #Want to train for those with lower
-        #    if hist[i] > 0:
-        #        duration = hist[i]
-        #        hist[i] = 0
-        #        max_hist[i] = 0
-        #        cur = min(rem, duration)
-        #        while cur <= duration:
-        #            inp_data[i].append([cur/time_alloc])
-        #            #Shouldn't need to care that we are intermixing since each one is generated seperately
-        #            train_bool[i].append(cur <= rem)
-        #            label_data[i].append([(duration - cur)/time_alloc])
-        #            #Every five minutes
-        #            cur += rem
-        #        #inp_data[i].append([duration/time_alloc])
-        #        #train_bool[i].append(True)
-        #        ##This should not be used anyways
-        #        #label_data[i].append([0])
-        #        #print(f"{int(float(temp[0])/time_alloc)} {int(float(temp[1]))}")
     return inp_data
 
 
@@ -305,13 +213,10 @@ rem = 180
 buffers = [1, 1.05, 1.1, 1.2, 1.3,1.4]
 buf=1
 if len(sys.argv) >= 3:
-    #rem = windows[int(sys.argv[2])]
     buf = buffers[int(sys.argv[2])]
 
 #History length used for predictions
 window = 3
-#Not used
-epochs = 15
 #Not used
 batch_size=1 
 #24 hours in 30 minute increments
@@ -321,7 +226,6 @@ under_g = 0
 total_g = 0 
 outputs = 25
 cyc_overhead = 350
-seen = set()
 #Smallest allocation is 30 minutes
 time_alloc = 1800
 #The largest possible allocation in secodns
@@ -347,8 +251,6 @@ optimizer = []
 for i in range(channels):
     model.append(LSTM(input_size=1, output_size=1).to(DEVICE))
     optimizer.append(torch.optim.Adam(model[i].parameters(), lr=0.006))
-#model = LSTM(input_size=1, output_size=1).to(DEVICE)
-#optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 loss_function = nn.MSELoss()
 
 
@@ -366,17 +268,10 @@ for i in range(channels):
 num_samples = len(input_seq)
 print(f"num_samples: {num_samples}")
 
-print(seen)
 pred_online=[]
-if mode == "train":
-    for i in range(channels):
-    #for i in range(5):
-        print(f"Training: {i}")
-        pred_online = train_online(model[i], optimizer[i], input_seq[i], train_bool[i], epochs=epochs, batch_size=batch_size,num=i)
-        #total_g += len(pred_online)
-elif mode == "test":
-    checkpoint = torch.load("checkpoint", map_location=DEVICE)
-    model.load_state_dict(checkpoint['state_dict'])
+for i in range(channels):
+    print(f"Training: {i}")
+    pred_online = train_online(model[i], optimizer[i], input_seq[i], train_bool[i], batch_size=batch_size,num=i)
 
 if total_g != 0:
     print(f"overpred: {over_g/total_g}, correct: {(correct_g)/total_g}, underpred: {under_g/total_g}")
@@ -390,33 +285,8 @@ if total_g != 0:
 else:
     print("Not enough to train with at all...")
 
-#Used for generating plots if needed.
-'''
-plot_input = []
-deb_output = []
-plot_channel = []
-for inp in input_data:
-    plot_input.append(inp[0])
-    deb_output.append(str(inp[0]) + " " + str(inp[1]))
-#For debugging
-with open(in_file+"_deb", 'w') as f:
-    print("\n".join(map(str,plot_input)), file=f)
-#    print(",".join(map(str,pred_online)), file=f)
-'''
-
-#window = 0
-#plt.plot(np.arange(len(plot_input)), plot_input, label='input')
-#plt.plot(np.arange(0, num_samples//2)+window, pred_train)
-#tot,read,write = list(zip(*pred_test))
-#tot = list(zip(*pred_test))
 for i in range(channels):
     checkpoint = {'model':model[i], 
             'state_dict': model[i].state_dict(),
             'optimizer':optimizer[i].state_dict()}
     torch.save(checkpoint, str(i)+'_dur_bw.model')
-#plt.plot(np.arange(len(pred_online))+window, pred_online, label='pred')
-#plt.xlabel("Time (s)")
-#plt.ylabel("Duration of Bandwidth (30 mins)")
-#plt.legend()
-#plt.gca().set_ylim(ymin=0)
-#plt.savefig(f"{in_file[:-4]}.png")

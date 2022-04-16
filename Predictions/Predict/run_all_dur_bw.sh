@@ -36,8 +36,7 @@ then
                 for k in {1..5}; do
                     cnt=$((cnt+1))
                     echo "Running ${FILE} ${i}"
-                    #python3 lstm_dur_bw.py "${IN}/${FILE}_${j}_${i}_dur" > "${OUT}/${FILE}_${j}_${i}.out" &
-                    python3 lstm_dur_bw.py "${IN}/${FILE}_${i}_dur" $j > "${OUT}/${FILE}_${j}_${cnt}.out" 
+                    python3 lstm_dur_bw.py "${IN}/${FILE}_${i}_dur" $j > "${OUT}/${FILE}_${j}_${cnt}.out" &
                 done
             done
             wait
@@ -47,12 +46,12 @@ then
         cnt=0
         mult=0
         for file in ${IN}/c_*.txt; do
-            #for i in {1..5}; do
-            echo $file
-            python3 lstm_dur_ali.py $file $j > "${OUT}/ali_${j}_${mult}.out" 
-            mult=$((mult+1))
-            #done
-            #wait
+            for i in {1..5}; do
+                echo $file
+                python3 lstm_dur_ali.py $file $j > "${OUT}/ali_${j}_${mult}.out" &
+                mult=$((mult+1))
+            done
+            wait
             cnt=$((cnt+1))
             if [ $cnt == 5 ]
             then
