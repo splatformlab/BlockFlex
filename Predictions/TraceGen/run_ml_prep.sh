@@ -16,7 +16,7 @@ echo "Resetting sudo so it does not expire"
 echo " Comment this out for batched runs"
 sudo -k
 sudo echo "Success"
-for RUN in {1..6}; do
+for RUN in {1..5}; do
     echo "Running workload ${TYPE} and outputting to ${OUT}"
     sudo sh -c "echo '3' >> /proc/sys/vm/drop_caches"
     echo "Removing old output"

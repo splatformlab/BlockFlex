@@ -20,13 +20,15 @@ For plotting container utilization we sample 30,000 containers.  The results for
 For plotting machine utilization, we use the full machine_usage.csv trace from Alibaba.
 Finally, run the following (should take under 10 minutes):
 ```shell
-# (Optional) Grab the smaller container file (~1.3 GB)
+#(Optional) Grab the smaller container file (~1.3 GB)
 gdown 1JMTT2CyMB_dyA86OfNwTPZUd2PhTX4ZW
 gunzip container_usage_sub.csv.gz
+
 #Creates the input file to the next command (ali_container_usage.dat)
 python3 container_parser.py 
 #Plot the container utilization (creates ali_container_usage.pdf)
 python3 ali_container_usage.py
+
 #Creates the input file to the next command (ali_machine_usage.dat)
 python3 machine_parser.py 
 #Plot the machine utilization (creates ali_machine_usage.pdf)
@@ -49,6 +51,7 @@ cp usage_parser.py google-cloud-sdk/clusterdata-2011-2/
 #Run them (!! WARNING THIS WILL TAKE A LONG TIME)
 #Produces the parsed_all_prio_events.csv file which contains the high priority VMs
 python3 prio_events_parser.py
+
 #Produces the usages_500.csv which is the total trace filtered by priority events
 python3 usage_parser.py
 #Copy the resulting files back into the Traces directory
@@ -134,26 +137,66 @@ The preparation scripts mimic the statistic collections of BlockFlex by reportin
 
 ```shell
 #Enter the prep directory
-cd Prep
+cd Prep/
+
 #Download the traces (~21 GB)
 gdown 1hWZJOKNyumce0UNo45zb3_pfyytwg2YC
 #Unzip them, should have a number of file with the format WORKLOAD_NUM.sizing and WORKLOAD_num.trace
 tar -xzvf traces.tar.gz
+
+#Prepare directories for outputs of next scripts:
+mkdir inputs
+mkdir inputs/bw
+mkdir inputs/sz
+mkdir inputs/dur_bw
+mkdir inputs/dur_sz
+
 #Run the preparation scripts
 #Should create a set of files with the format WORKLOAD_NUM_stats in the input/bw directory
 ./regen_bw.sh
 #Should create a set of files with the format WORKLOAD_NUM_sizing in the input/sz directory
+# and a set of files with the format WORKLOAD_NUM_dur in the input/dur_sz directory
 ./regen_size.sh
-#Should create a set of files with the format WORKLOAD_NUM_dur in the input/dur_bw and input/dur_sz directories
+#Should create a set of files with the format WORKLOAD_NUM_dur in the input/dur_bw directory
 ./regen_duration.sh
+
 #We are done in this directory
-cd ..
+cd ../
 ```
 
 Now that we have the inputs prepared, we go into the predictor directory and run them on the inputs
 ```shell
-
+#Enter the Predict directory
+cd Predict/
 ```
+ Here you will want to update every run_all script. The IN,OUT, and CP_DIR variables should be updated with the prefix for your system.
+ For example, if you clone the repository in your root directory the paths would be   
+ ~/BlockFlex/Predictions/Predict/inputs/bw  
+ ~/BlockFlex/Predictions/Predict/outputs/bw   
+ ~/BlockFlex/Predictions/Prep/inputs/bw   
+ respectively.  
+ Each of these scripts can be run stand-alone. They copy the prepared files from the Prep directory into the local inputs. Then, runs the predictor on each 5 times. Then parses and reports the accuracy numbers. The inputs for alibaba and google traces are already in the local input directories and are not copied first.
+ ```shell
+#First prepare the output directories
+mkdir outputs
+mkdir outputs/bw
+mkdir outputs/sz
+mkdir outputs/dur_bw
+mkdir outputs/dur_sz
+
+#Run the bandwidth predictor
+./run_all_bw.sh
+
+#Run the size predictor
+./run_all_bw.sh
+
+#Run the bandwidth duration predictor
+./run_all_bw.sh
+
+#Run the size duration predictor
+./run_all_bw.sh
+
+ ```
 
 
 ## 4. BlockFlex
