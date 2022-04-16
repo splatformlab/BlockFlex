@@ -93,6 +93,8 @@ We include how each trace was produced in the following dropdowns:
 <details>
 <summary>Alibaba/Google</summary>
 <br>
+We randomly select 5 containers/VMs and isolate their workloads from the overall trace. They are preprocessed to be represented by {duration, amount} pairs where the VM is using amount resources for duration period of time. The predictors parse this into the same input format as described in the paper.
+For reference, the scripts (train_gen_ali.py and train_gen_gl.py) to generate these pairs are included.
 </details>
 <details>
 <summary>terasort</summary>
@@ -119,7 +121,7 @@ The preparation scripts mimic the statistic collections of BlockFlex by reportin
 ```shell
 #Enter the prep directory
 cd Prep
-#Download the traces (~TODO GB)
+#Download the traces (~21 GB)
 gdown 1hWZJOKNyumce0UNo45zb3_pfyytwg2YC
 #Unzip them, should have a number of file with the format WORKLOAD_NUM.sizing and WORKLOAD_num.trace
 tar -xzvf traces.tar.gz
