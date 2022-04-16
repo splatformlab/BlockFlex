@@ -222,10 +222,10 @@ mkdir outputs/dur_sz
 #Run the size predictor (takes ~20 minutes)
 ./run_all_sizing.sh
 
-#Run the bandwidth duration predictor ()
+#Run the bandwidth duration predictor (takes ~20 minutes)
 ./run_all_dur_bw.sh
 
-#Run the size duration predictor ()
+#Run the size duration predictor (takes ~20 minutes)
 ./run_all_dur_sizing.sh
 ```
 
