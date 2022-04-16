@@ -5,10 +5,13 @@ BlockFlex is out learning-based storage harvesting framework, which can harvest 
 ## 1. Overview
 The following packages are necessary to install before running the following scripts.
 ```shell
-sudo apt update
-sudo apt install ...
 #Easy command line download of google drive files
-pip install gdown
+pip3 install gdown
+#Performance analysis of predictors
+pip3 install hwcounter
+#Various useful python packages
+pip3 install numpy, matplotlib,sklearn
+#Install pytorch from this link: https://pytorch.org/get-started/locally/
 ```
 
 ## 2. Trace Analysis
