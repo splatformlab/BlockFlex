@@ -7,7 +7,7 @@ IN=/home/breidys2/Research/Codes/BlockFlex/Predictions/Predict/inputs/bw/
 WINDOWS=("1" "1.05" "1.1" "1.2" "1.3" "1.4")
 OUT=/home/breidys2/Research/Codes/BlockFlex/Predictions/Predict/outputs/bw/
 COPY=1
-PRED=0
+PRED=1
 ACC=0
 
 if [ $COPY -gt 0 ]
