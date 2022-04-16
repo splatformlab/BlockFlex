@@ -3,6 +3,9 @@
 BlockFlex is out learning-based storage harvesting framework, which can harvest flash-based storage resources at fine-grained granularity in modern clould platforms.
 
 ## 1. Overview
+The languages required to run the code in the directory are Python (>=3.6), Java (tested with 1.8), and C (tested with gcc version 4.8).
+For the artifact committee, the correct gcc version is already installed on the test machine.
+
 The following packages are necessary to install before running the following scripts.
 ```shell
 #Easy command line download of google drive files
@@ -51,6 +54,9 @@ First, follow the instructions in [2] to download the full dataset.
 #Copy the scripts into the google trace directory
 cp prio_events_parser.py google-cloud-sdk/clusterdata-2011-2/
 cp usage_parser.py google-cloud-sdk/clusterdata-2011-2/
+#Enter the trace directory
+cd google-cloud-sk/clusterdata-2011-2/
+
 #Run them (!! WARNING THIS WILL TAKE A LONG TIME)
 #Produces the parsed_all_prio_events.csv file which contains the high priority VMs
 python3 prio_events_parser.py
@@ -138,7 +144,7 @@ For reference, the scripts (train_gen_ali.py and train_gen_gl.py) to generate th
 </details>
 <details>
 <summary>terasort</summary>
-We install hadoop-3-3 using the hadoop documentation: https://hadoop.apache.org/docs/r3.3.0/hadoop-project-dist/hadoop-common/SingleCluster.html 
+We install hadoop-3.3.0 using the hadoop documentation: https://hadoop.apache.org/docs/r3.3.0/hadoop-project-dist/hadoop-common/SingleCluster.html 
 
 The run_hadoop.sh script provides a reference to how we collect the traces. We generate a 75GB dataset with TeraGen and then sort it with TeraSort. Traces are collected using blktrace. The size information is collected with check.sh which uses the 'du' command to track the size of the hadoop directory.
 <br>
@@ -212,17 +218,17 @@ mkdir outputs/dur_sz
 ./run_all_bw.sh
 
 #Run the size predictor
-./run_all_bw.sh
+./run_all_sizing.sh
 
 #Run the bandwidth duration predictor
-./run_all_bw.sh
+./run_all_dur_bw.sh
 
 #Run the size duration predictor
-./run_all_bw.sh
+./run_all_dur_sizing.sh
 ```
 
 ## 4. BlockFlex
-You will find two directories under BlockFlex: ocssd/ and blockflex/. Directory ocssd/ contains scripts and code to setup the iSCSI virtual disk environment and virtual machine instances. Directory blockflex/ contains the main repo for the BlockFlex framework. To obtain th bandwidth improvement plots in Figure 18 and 19, please follow the instructions. 
+You will find two directories under BlockFlex: ocssd/ and blockflex/. Directory ocssd/ contains scripts and code to setup the iSCSI virtual disk environment and virtual machine instances. Directory blockflex/ contains the main repo for the BlockFlex framework. To obtain the bandwidth improvement plots in Figure 18 and 19, please follow the instructions. 
 
  ```shell
 # Setup environment for mqueue and tgtd
