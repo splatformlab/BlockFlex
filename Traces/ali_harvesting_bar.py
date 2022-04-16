@@ -13,6 +13,9 @@ hr_6 = []
 hr_12 = []
 hr_72 = []
 
+total_vms = 4000
+
+# Here we filter out the trailing zeros to ignore the last few timestamps in the trace. For a 7-day trace and 12 hours of harvesting, the final 12 hours are not considered harvestable. 
 with open('ali_harvesting_bar.dat', 'r') as f:
     data = f.readlines()
     for i in range(3):

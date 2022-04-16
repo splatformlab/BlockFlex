@@ -77,7 +77,21 @@ The final output is stored in google_util_cdf.pdf
 Ommitted due to business confidentiality
 
 ### Figure 4
-TODO JINGHAN
+We use the Alibaba Cloud Traces[1] for Figure 4.
+
+For plotting the availability of harvesting we sample 4,000 containers. We use the same container_usage.csv from Alibaba that is download from the previous step. Run the following (should take under 10 minutes):
+
+```shell
+# (Optional) Grab the smaller container file (~1.3 GB)
+#Creates the input file to the next command (ali_stats_util_cdf.txt)
+python3 ali_container_parse.py
+#Convert from CDF data to Histogram (creates ali_harvesting_bar.dat)
+python3 ali_container_cdf.py
+#Plot the percentage of harvestable period
+python3 ali_harvesting_bar.py
+```
+This will create Figures 4 in ali_harvesting_bar.pdf.
+
 
 ### Figure 5
 Ommitted due to business confidentiality
