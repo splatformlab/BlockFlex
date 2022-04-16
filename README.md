@@ -219,7 +219,28 @@ mkdir outputs/dur_sz
  ```
 
 ## 4. BlockFlex
+You will find two directories under BlockFlex: ocssd/ and blockflex/. Directory ocssd/ contains scripts and code to setup the iSCSI virtual disk environment and virtual machine instances. Directory blockflex/ contains the main repo for the BlockFlex framework. To obtain th bandwidth improvement plots in Figure 18 and 19, please follow the instructions. 
 
+ ```shell
+# Setup environment for mqueue and tgtd
+sudo sh -c "ulimit -n 65535 && exec su $LOGNAME"
+cd BlockFlex/ocssd/
+./prepare.sh
+# Make iSCSI
+make -C iscsi/
+# Setup iSCSI virtual disks and the KVM instances; choice of workloads are mlprep, pagerank, and terasort.
+sudo python3 setup.py
+# VM0 is the harvest VM; Run harvestable workloads in VM0
+ssh vm0 "sudo python3 workload_parser.py [workload] harvest" &
+# VM1 is the regular VM; Run foreground workloads in VM0
+ssh vm1 "sudo python3 workload_parser.py ycsb regular" &
+
+cd ../blockflex/
+make
+sudo ./harvest 0 0 > pagerank_no_harvest.txt
+sudo ./harvest 0 4 > pagerank_harvest_unsold.txt
+sudo ./harvest 4 4 > pagerank_harvest_sold.txt
+ ```
 
 ## 5. Sources
 [1]. https://github.com/alibaba/clusterdata/blob/master/cluster-trace-v2018/trace_2018.md  
