@@ -35,10 +35,10 @@ then
                 for k in {1..5}; do
                     cnt=$((cnt+1))
                     echo "Running ${FILE} ${i}"
-                    python3 lstm_bw.py "${IN}/${FILE}_${i}_stats" $j > "${OUT}/${FILE}_${j}_${cnt}.out" 
+                    python3 lstm_bw.py "${IN}/${FILE}_${i}_stats" $j > "${OUT}/${FILE}_${j}_${cnt}.out" &
                 done
             done
-            #wait
+            wait
         done
     done
     for (( j=0; j<${#WINDOWS[@]}; j++ )); do
@@ -47,7 +47,7 @@ then
         for file in ${IN}/c_*.txt; do
             for i in {1..5}; do
                 echo $file
-                python3 lstm_bw_ali.py $file $j > "${OUT}/ali_${j}_${mult}.out" 
+                python3 lstm_bw_ali.py $file $j > "${OUT}/ali_${j}_${mult}.out" &
                 mult=$((mult+1))
             done
             cnt=$((cnt+1))

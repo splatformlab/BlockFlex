@@ -1,20 +1,13 @@
 import torch.nn as nn
 from hwcounter import count, count_end
 import torch
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 import math
 import numpy as np
 import sys
-import sklearn
 
-#DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 DEVICE = torch.device("cpu")
-#windows = [6, 12, 18, 24, 30, 36, 42, 48, 54, 60]
 windows = [18]
 
-mode = "train"
 in_file = "c_10005.txt"
 
 if len(sys.argv) >= 2:
@@ -27,10 +20,7 @@ class LSTM(nn.Module):
         self.lstm = nn.LSTM(input_size, hidden_layer_size)
         self.input_size = input_size
         self.linear = nn.Linear(hidden_layer_size, output_size)
-        #TODO Testing using a softmax output
-        #TODO CHECK THIS
         self.softmax = nn.Softmax(dim=2)
-        #self.init_hidden()
         print(self)
 
     def init_hidden(self, batch_size):
@@ -38,17 +28,13 @@ class LSTM(nn.Module):
                             torch.zeros(1,batch_size,self.hidden_layer_size).to(DEVICE))
 
     def forward(self, inputs):
-        # inputs.shape = (seq_length, batch_size)
         features = self.input_size
         batch_size = inputs.shape[0]
         seq_length = inputs.shape[1]
         self.init_hidden(batch_size)
-        #print(inputs.view(seq_length, batch_size, features))
         lstm_out, self.hidden_cell = self.lstm(inputs.view(seq_length, batch_size, features), self.hidden_cell)
         predictions = self.linear(lstm_out.view(seq_length, batch_size, self.hidden_layer_size))
-        #TODO TESTING SOFTMAX
         predictions = self.softmax(predictions)
-        #print(inputs.shape, predictions.shape, predictions[-1][-1].shape)
         return predictions[-1]
 
 
@@ -56,7 +42,6 @@ class LSTM(nn.Module):
 def train_online(model, train_sequence, epochs=15, batch_size=1):
     num_batches = len(train_sequence)//batch_size
     print(f"Total epochs: {epochs}, total batches {num_batches}")
-    print_gran = 200
     pred = []
     variation =0
     correct = 0
@@ -79,13 +64,9 @@ def train_online(model, train_sequence, epochs=15, batch_size=1):
         labels = torch.stack(list_labels)
         start = count()
         optimizer.zero_grad()
-        #outputs = model(inputs)
         #This seems to be needed in order to make the dimensions match, its just a dummy dimension
         outputs = torch.unsqueeze(model(inputs), 0)
-        #outputs = torch.floor(outputs) + 1
         single_loss = loss_function(outputs, labels)
-        #if j % print_gran == print_gran-1:
-        #    print(f"Single Loss: {single_loss}")
         single_loss.backward()
         optimizer.step()
         train_time += count_end() - start
@@ -100,13 +81,7 @@ def train_online(model, train_sequence, epochs=15, batch_size=1):
                 labels = torch.stack(list_labels)
                 label_score = torch.argmax(labels)
                 start = count()
-                #tag_score = model(inputs)
-                #print(f"Pred: {tag_score}, label: {labels}")
                 tag_score = torch.argmax(model(inputs))
-                #label_score = labels
-                #tag_score = torch.ceil(tag_score)
-                #tag_score = model(inputs.unsqueeze(0))
-                #pred.append(tag_score.cpu().detach().numpy()[0])
                 pred_time += count_end() - start
                 buf_score = int(math.ceil(tag_score*buf))
                 if buf_score > 6:
@@ -133,27 +108,8 @@ def train_online(model, train_sequence, epochs=15, batch_size=1):
     print(f"avg_overpred: {o_pred_sum} {above}")
     print(f"avg_underpred: {u_pred_sum} {below}")
     #print(f"time per: {(end-start)/(epochs*num_batches)}")
-    print("avg_variation ", variation/len(train_sequence))
     return pred
-    #checkpoint = {'model':model, 
-    #        'state_dict': model.state_dict(),
-    #        'optimizer':optimizer.state_dict()}
-    #torch.save(checkpoint, 'checkpoint')
 
-
-def test(model, test_seq):
-    #Test what the scores are after training
-    variation = 0
-    pred = []
-    model.eval()
-    with torch.no_grad():
-        for i, (seq,label) in enumerate(test_seq):
-            tag_score = model(seq.unsqueeze(0))
-            #TODO
-            pred.append(tag_score.cpu().detach().numpy()[0])
-            variation += abs(tag_score - label)
-    print("avg_variation ", variation/len(test_seq))
-    return pred
 
 def preprocessing(input_data, win):
     inout_seq = []
@@ -199,7 +155,6 @@ rem = 18
 buf = 1
 buffers = [1, 1.05, 1.1, 1.2, 1.3, 1.4]
 if len(sys.argv) >= 3:
-    #rem = windows[int(sys.argv[2])]
     buf = buffers[int(sys.argv[2])]
 window = 3
 epochs = 15
@@ -229,12 +184,7 @@ num_samples = len(input_seq)
 print(f"num_samples: {num_samples}")
 
 pred_online=[]
-if mode == "train":
-    pred_online = train_online(model, input_seq, epochs=epochs, batch_size=batch_size)
-    #pred_online = train(model, input_seq[:num_samples//2], epochs=epochs, batch_size=batch_size)
-elif mode == "test":
-    checkpoint = torch.load("checkpoint", map_location=DEVICE)
-    model.load_state_dict(checkpoint['state_dict'])
+pred_online = train_online(model, input_seq, epochs=epochs, batch_size=batch_size)
 
 #Adjust for cycle overhead of the tracking itself
 train_over_adjusted = train_time - (train_samples * cyc_overhead)
@@ -244,39 +194,7 @@ pred_over_adjusted/=pred_samples
 print(f"Training Overhead: Samples: {train_samples} Time: {train_time} Per: {train_over_adjusted}")
 print(f"Prediction Overhead: Samples: {pred_samples} Time: {pred_time} Per: {pred_over_adjusted}")
 
-#split 50/50 for train/test
-#pred_train = test(model, input_seq[:num_samples//2])
-#pred_test = test(model, input_seq[num_samples//2:])
-
 checkpoint = {'model':model, 
         'state_dict': model.state_dict(),
         'optimizer':optimizer.state_dict()}
 torch.save(checkpoint, 'sz_check.model')
-
-'''
-plot_input = []
-deb_output = []
-plot_channel = []
-for inp in input_data:
-    plot_input.append(inp[14])
-    deb_output.append(str(inp[14]) + " " + str(inp[17]))
-
-with open(in_file+"_deb", 'w') as f:
-    print("\n".join(map(str,plot_input)), file=f)
-#    print(",".join(map(str,pred_online)), file=f)
-
-#TODO
-#window = 0
-plt.plot(np.arange(len(plot_input)), plot_input, label='input')
-#plt.plot(np.arange(0, num_samples//2)+window, pred_train)
-#tot,read,write = list(zip(*pred_test))
-#tot = list(zip(*pred_test))
-
-plt.plot(np.arange(len(pred_online))+window, pred_online, label='pred')
-plt.xlabel("Time (s)")
-plt.ylabel("Number of Channels")
-plt.legend()
-plt.gca().set_ylim(ymin=0)
-plt.savefig(f"{in_file}.png")
-
-'''

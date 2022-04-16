@@ -36,8 +36,7 @@ then
                 for k in {1..5}; do
                     echo "Running ${FILE} ${i}"
                     cnt=$((cnt+1))
-                    #python3 lstm_sz.py "${IN}/${FILE}_${j}_${i}_sizing" > "${OUT}/${FILE}_${j}_${i}.out" &
-                    python3 lstm_sz.py "${IN}/${FILE}_${i}_sizing" $j > "${OUT}/${FILE}_${j}_${cnt}.out" 
+                    python3 lstm_sz.py "${IN}/${FILE}_${i}_sizing" $j > "${OUT}/${FILE}_${j}_${cnt}.out" &
                 done
             done
             wait
@@ -47,13 +46,13 @@ then
         cnt=0
         mult=0
         for file in ${IN}/*.txt; do
-            #for i in {1..5}; do
-            echo $file
-            python3 lstm_sz_gl.py $file $j > "${OUT}/google_${j}_${mult}.out" &
-            mult=$((mult+1))
-            #done
+            for i in {1..5}; do
+                echo $file
+                python3 lstm_sz_gl.py $file $j > "${OUT}/google_${j}_${mult}.out" &
+                mult=$((mult+1))
+            done
             cnt=$((cnt+1))
-            #wait
+            wait
             if [ $cnt == 5 ] 
             then
                 break
