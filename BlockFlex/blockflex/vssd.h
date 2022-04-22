@@ -4,6 +4,7 @@
 #include "nexus.h"
 #include "blklist.h"
 #include "queue.h"
+#include "../ocssd/ocssd_queue.h"
 #include <pthread.h>
 #include <stdint.h>
 #include <time.h>

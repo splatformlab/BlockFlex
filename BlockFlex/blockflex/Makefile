@@ -20,8 +20,12 @@ LINK_LIBS = -lrt
 all: $(PROGRAM)
 	@$(RM) $(OBJS)
 
+debug: CFLAGS+=-DDEBUG
+debug: all
+
 clean:
 	$(RM) $(OBJS) $(PROGRAM)
+	$(RM) *.txt
 
 show:
 	@echo 'PROGRAM     :' $(PROGRAM)

@@ -3,10 +3,7 @@
 BlockFlex is out learning-based storage harvesting framework, which can harvest flash-based storage resources at fine-grained granularity in modern clould platforms.
 
 ## 1. Overview
-The languages required to run the code in the directory are Python (>=3.6), Java (tested with 1.8), and C (tested with gcc version 4.8).
-For the artifact committee, the correct gcc version is already installed on the test machine.
-
-The following packages are necessary to install before running the following scripts.
+The following packages are necessary to install before running the following scripts. Please check our GitHub repo for the traces, code and scripts https://github.com/breidys2/BlockFlex.
 ```shell
 #Easy command line download of google drive files
 pip3 install gdown
@@ -18,6 +15,7 @@ pip3 install numpy, matplotlib,sklearn
 ```
 
 ## 2. Trace Analysis
+
 ### Figure 1
 We use the Alibaba Cloud Traces[1] for Figure 1.
 
@@ -54,9 +52,6 @@ First, follow the instructions in [2] to download the full dataset.
 #Copy the scripts into the google trace directory
 cp prio_events_parser.py google-cloud-sdk/clusterdata-2011-2/
 cp usage_parser.py google-cloud-sdk/clusterdata-2011-2/
-#Enter the trace directory
-cd google-cloud-sk/clusterdata-2011-2/
-
 #Run them (!! WARNING THIS WILL TAKE A LONG TIME)
 #Produces the parsed_all_prio_events.csv file which contains the high priority VMs
 python3 prio_events_parser.py
@@ -144,18 +139,19 @@ For reference, the scripts (train_gen_ali.py and train_gen_gl.py) to generate th
 </details>
 <details>
 <summary>terasort</summary>
-We install hadoop-3.3.0 using the hadoop documentation: https://hadoop.apache.org/docs/r3.3.0/hadoop-project-dist/hadoop-common/SingleCluster.html 
+We install hadoop-3-3 using the hadoop documentation: https://hadoop.apache.org/docs/r3.3.0/hadoop-project-dist/hadoop-common/SingleCluster.html.The run_hadoop.sh script provides a reference to how we collect the traces. We generate a 75GB dataset with TeraGen and then sort it with TeraSort. Traces are collected using blktrace. The size information is collected with check.sh which uses the 'du' command to track the size of the hadoop directory.
 
-The run_hadoop.sh script provides a reference to how we collect the traces. We generate a 75GB dataset with TeraGen and then sort it with TeraSort. Traces are collected using blktrace. The size information is collected with check.sh which uses the 'du' command to track the size of the hadoop directory.
 <br>
 </details>
+
 <details>
 <summary>graphchi</summary>
 <br>
-We install graphchi using their git repo: https://github.com/GraphChi/graphchi-cpp
-
-The run_graphchi.sh script provides a reference to how we collect the traces. We use graphchi's sample implementation of pagerank and input the Friendster graph. As with hadoop, the size information is collected with check.sh
+We install graphchi using their git repo: https://github.com/GraphChi/graphchi-cpp. The run_graphchi.sh script provides a reference to how we collect the traces. We use graphchi's sample implementation of pagerank and input the Friendster graph. As with hadoop, the size information is collected with check.sh
 </details>
+
+
+
 <details>
 <summary>ml_prep</summary>
 We download the 2017 ImageNet dataset and repeatedly run simple preprocessing operations to mimic a batch processing of images for ML training. The python file and run_ml_prep.sh are included for reference.
@@ -204,10 +200,8 @@ cd Predict/
  ~/BlockFlex/Predictions/Predict/outputs/bw   
  ~/BlockFlex/Predictions/Prep/inputs/bw   
  respectively.  
-Finally, to correctly parse the accuracy numbers, modify the path contained in the BASE variable of acc_parser.py in the same fashion.  
+ Each of these scripts can be run stand-alone. They copy the prepared files from the Prep directory into the local inputs. Then, runs the predictor on each 5 times. Then parses and reports the accuracy numbers. The inputs for alibaba and google traces are already in the local input directories and are not copied first.
 
- Each of these scripts can be run stand-alone. They copy the prepared files from the Prep directory into the local inputs. Then, runs the predictor on each 5 times. Then parses and reports the accuracy numbers. The inputs for alibaba and google traces are already in the local input directories and are not copied first. The output files will be under the corresponding outputs directory. The parsed output files will be printed by the scripts but can be retrieved from the outputs directory under PREDICTOR_acc_out.txt (bw_acc_out.txt for bandwidth). If you want to rerun only a part of the script, i.e. only copy files, only run prediction, or only compute and output results, you can modify the variables at the top of the script accordingly.
- 
 ```shell
 #First prepare the output directories
 mkdir outputs
@@ -216,43 +210,86 @@ mkdir outputs/sz
 mkdir outputs/dur_bw
 mkdir outputs/dur_sz
 
-#Run the bandwidth predictor (takes ~20 minutes)
+#Run the bandwidth predictor
 ./run_all_bw.sh
 
-#Run the size predictor (takes ~20 minutes)
-./run_all_sizing.sh
+#Run the size predictor
+./run_all_bw.sh
 
-#Run the bandwidth duration predictor (takes ~20 minutes)
-./run_all_dur_bw.sh
+#Run the bandwidth duration predictor
+./run_all_bw.sh
 
-#Run the size duration predictor (takes ~20 minutes)
-./run_all_dur_sizing.sh
+#Run the size duration predictor
+./run_all_bw.sh
 ```
 
 ## 4. BlockFlex
-You will find two directories under BlockFlex: ocssd/ and blockflex/. Directory ocssd/ contains scripts and code to setup the iSCSI virtual disk environment and virtual machine instances. Directory blockflex/ contains the main repo for the BlockFlex framework. To obtain the bandwidth improvement plots in Figure 18 and 19, please follow the instructions. 
+We provide an internet-accessible machine to our programmable SSD platform. Currently, it is only available for artifact evaluation purposes. Please contact us for accessing the machine. 
+
+You will find two directories under BlockFlex: ocssd/ and blockflex/. Directory ocssd/ contains the iSCSI virtual disk environment, the management scripts and the workload replayer. Directory blockflex/ contains the main repo for the BlockFlex framework. The BlockFlex repository is (partially) structured as following:
+
+```shell
+├── blockflex
+│   ├── blklist.c
+│   ├── blklist.h
+│   ├── channel.c
+│   ├── channel.h
+│   ├── harvesting_nexus.c   #  the storage harvesting program of BlockFlex
+│   ├── lstm_bw.py     # bandwidth predictor
+│   ├── lstm_dur.py    # duration predictor
+│   ├── lstm_sz.py     # capacity predictor
+│   ├── Makefile
+│   ├── nexus.h
+│   ├── parser.c
+│   ├── parser_nexus.c
+│   ├── pred.py   # the bandwidth and capacity predictor 
+│   ├── vssd.c   # the vssd structure
+│   ├── vssd.h
+├── Makefile
+└── ocssd
+    ├── imgs   # dummy file backend images
+    ├── iscsi  # iscsi disk virtualization daemon
+    │   ├── bs_rdwr.c   # the virtual disk request handler
+    ├── logs   # iscsi and predictor logs
+    ├── macros.py
+    ├── Makefile
+    ├── mqueue_cleaner
+    ├── mqueue_cleaner.c
+    ├── ocssd_queue.h  # the header file for the request queues
+    ├── plot_bw.py  # plot harvesting bandwidth
+    ├── prepare.sh  # env setup
+    ├── results   # bandwidth harvesting plots
+    ├── setup.py  # the management program
+    ├── traces  # trace files
+    └── workload.py  # the workload replayer
+```
+
+The workflow of BlockFlex is shown in the figure below. Once the management program **setup.py** is launched, it will first setup the virtual disks **/dev/sde** and **/dev/sdf**. One of them will run the storage harvesting VM program, and another will run the regular VM program. You should be able to see them with the fdisk command. Then it will run blockflex storage harvesting **blockflex/harvest** to create the vssds and the shared request queue between the blockflex and virtual disks. An iSCSI daemon **tgtd** will forward the block I/O request from the virtual disks to the blockflex. Blockflex will allocate physical flash channels and perform actual read / write operations. Finally, the management will launch the workload replayer **workload.py** and the predictors **pred.py**. The workload replayer takes input traces, and performs I/O to the virtual disks. The predictor receives I/O statictics from BlockFlex and performs bandwidth / capacity prediction. You should see all the running processes with the ps command.
+
+<p align="center">
+    <img src="Imgs/blockflex.png" alt="blockflex" style="zoom:80%;" />
+</p>
+
+To obtain the bandwidth improvement plots in Figure 18 and 19, please follow these instructions. 
 
  ```shell
-# Setup environment for mqueue and tgtd
-sudo sh -c "ulimit -n 65535 && exec su $LOGNAME"
-cd BlockFlex/ocssd/
-./prepare.sh
-# Make iSCSI
-make -C iscsi/
-# Setup iSCSI virtual disks and the KVM instances; choice of workloads are mlprep, pagerank, and terasort.
-sudo python3 setup.py
-# VM0 is the harvest VM; Run harvestable workloads in VM0
-ssh vm0 "sudo python3 workload_parser.py [workload] harvest" &
-# VM1 is the regular VM; Run foreground workloads in VM0
-ssh vm1 "sudo python3 workload_parser.py ycsb regular" &
-
-cd ../blockflex/
+cd ~/BlockFlex/
+# Make iSCSI, BlockFlex Programs, and Message queue listener.
+make clean
 make
-sudo ./harvest 0 0 > pagerank_no_harvest.txt
-sudo ./harvest 0 4 > pagerank_harvest_unsold.txt
-sudo ./harvest 4 4 > pagerank_harvest_sold.txt
+cd ocssd/
+# Setup directories, kernel modules, and message queues
+./prepare.sh
+# Run the management script to setup iSCSI virtual disks, the BlockFlex program, the predictor, and the workload replayer. 
+# The choice of workloads are ML Prep, PageRank, and TeraSort. Each workload runs in three modes: harvest (sold), harvest (unsold), no harvest (static). 
+# Each mode takes around 30 ~ 40 minutes to complete. You may want to launch a tmux session to run it in the background. 
+# If you run into any issue, try "sudo python3 setup clean".
+sudo python3 setup.py
+# Plot the bandwidth harvesting results in ocssd/results/[workload]
+python3 plot.py [ml_prep|pagerank|terasort]
  ```
 
 ## 5. Sources
+
 [1]. https://github.com/alibaba/clusterdata/blob/master/cluster-trace-v2018/trace_2018.md  
 [2]. https://github.com/google/cluster-data/blob/master/ClusterData2011_2.md

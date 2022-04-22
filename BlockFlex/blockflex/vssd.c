@@ -313,8 +313,11 @@ void * prep_chl_v(void * args) {
     }
 
     //allocate the channel, reads badblock file, preps blocks, then adds to the free list 
-    // FIXME: remove debug
+#ifdef DEBUG
     erase_all_blk_chl_v_debug(i,ret_vssd,1);
+#else
+    erase_all_blk_chl_v_debug(i,ret_vssd,0);
+#endif
 }
 
 void erase_blks_v(vssd_t * v) {

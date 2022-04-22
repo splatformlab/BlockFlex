@@ -231,7 +231,7 @@ static void bs_rdwr_request(struct scsi_cmd *cmd)
 	case WRITE_10:
 	case WRITE_12:
 	case WRITE_16:
-        printf("PFE: cmd.scb[0] = %x: WRITE_6, _10, _12, _16\n", cmd->scb[0]);
+        // printf("PFE: cmd.scb[0] = %x: WRITE_6, _10, _12, _16\n", cmd->scb[0]);
 		length = scsi_get_out_length(cmd);
 		write_buf = scsi_get_out_buffer(cmd);
 write:
@@ -255,9 +255,8 @@ write:
             //ret = pwrite64(fd, write_buf, length, offset);
         }*/
         
-        //////////after OSDI:
         //do not filer cmds; log all write cmds
-        printf("PFE: interesting write cmd %x.\n", cmd->scb[0]);
+        // printf("PFE: interesting write cmd %x.\n", cmd->scb[0]);
         //ret = pwrite64(fd, write_buf, length, offset);
         //if(ENABLE_RECORD){
         if(pfe_enable_record != 0){
@@ -272,10 +271,12 @@ write:
         // direct the normal write to message queue
 		// ret = pwrite64(fd, write_buf, length, offset);
 		
-		// // TODO: check shared memory command queue logic here
-		if(stat("/home/js39/software/ocssd/environment/iscsi/start_replay", &sbuf) == 0){
+		char* path = concat(USR_DIR, "iscsi/start_replay");
+		if(stat(path, &sbuf) == 0){
 			Req message = {.vssd_id = cmd->c_target->tid, .mode=1, .offset = offset, .length=length};
 			strcpy(message.data, "harvest request");
+
+			// printf("%s %d\n", cmd->dev->path, cmd->c_target->tid);
 
 			if(cmd->c_target->tid == 1) mqfd = mqfd_0;
 			else if(cmd->c_target->tid == 2) mqfd = mqfd_1;
@@ -290,6 +291,7 @@ write:
 				// else fprintf(stdout, "Client is sending request: {%d, %d}\n", message.offset, message.length);
 			}
 		}
+		free(path);
 		// fflush(stdout);
 		// fflush(stderr);
 		
@@ -398,7 +400,6 @@ write:
         }
        */ 
 
-        //////////after OSDI:
         //log all read cmds
         // printf("PFE: interesting read cmd %x.\n", cmd->scb[0]);
         // if(pfe_enable_record != 0){
@@ -419,8 +420,7 @@ write:
         // printf("PFE: %d = pread64(%d, buffer, %u, %"PRIu64")\n", ret, fd, length, offset);
         // fflush(stdout);
 
-		// FIXME: remove hard code
-		// stat("/home/js39/software/ocssd/environment/iscsi/start_replay", &sbuf) == 0 && 
+		// filter non-workload commands
     	if(length != 4096){
 			Req read_message = {.vssd_id = cmd->c_target->tid, .mode=0, .offset = offset, .length=length};
 			strcpy(read_message.data, "harvest request");

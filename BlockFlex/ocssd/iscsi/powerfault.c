@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "powerfault.h"
 #include <sys/stat.h>
+#include "../ocssd_queue.h"
 
 /*config environment variables*/
 const char *pfe_io_block_size_environ="PFE_IO_BLOCK_SIZE";
@@ -161,6 +162,14 @@ void pfe_print_header(pfe_io_header_t *header){
 
     return;
 }
+char* concat(const char *s1, const char *s2)
+{
+    char *result = malloc(strlen(s1) + strlen(s2) + 1); // +1 for the null-terminator
+    // in real code you would check for errors in malloc here
+    strcpy(result, s1);
+    strcat(result, s2);
+    return result;
+}
 
 //log this write cmd
 //the most important function for recording
@@ -168,9 +177,12 @@ int pfe_log_io_req(struct scsi_cmd *cmd, uint64_t offset,\
         uint64_t length, char *buf){
 
     struct stat sbuf;   
-    // FIXME: remove hard code
-    if(stat("/home/js39/software/ocssd/environment/iscsi/start_log", &sbuf) != 0)
+    char* path = concat(USR_DIR, "iscsi/start_log");
+    if(stat(path, &sbuf) != 0){
+        free(path);
         return 0;
+    }
+    free(path);
 
     fprintf(stderr, "PFE:PFE: pfe_log_io_req(), pfe_io_id = %d\n", pfe_io_id);
 

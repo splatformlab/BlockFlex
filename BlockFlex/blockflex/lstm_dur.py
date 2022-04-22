@@ -3,6 +3,7 @@ import torch
 import math
 import numpy as np
 import sys
+from macros import *
 
 
 # Here we now use the sequence of last durations we have hit (5 min increments to predict how much
@@ -10,7 +11,7 @@ import sys
 # we actually have a shift.
 windows = [180]
 DEVICE = torch.device("cpu")
-
+global out_f
 class LSTM(nn.Module):
     def __init__(self, input_size=1, hidden_layer_size=50, output_size=1):
         super().__init__()
@@ -126,9 +127,9 @@ buf = 1.05
 outputs = 25
 out_lim =outputs * time_alloc
 channels = 17
-
-def main(in_q, comb_q, combiner, harvest):
-
+def main(in_q, comb_q, combiner, harvest, f=None):
+    global out_f
+    out_f = f
     #What is the current history, used for generating inputs for the training from the trace
     hist = [0 for _ in range(channels)]
     input_hist = [[] for _ in range(channels)]
@@ -171,13 +172,13 @@ def main(in_q, comb_q, combiner, harvest):
             other_pred = comb_q.get()
             #Combine logic
             if pred==-1 and other_pred ==-1:
-                print("NO PREDICTION")
+                log_msg("NO PREDICTION", out_f=out_f)
             elif pred==-1:
-                print("PREDICTING:", other_pred)
+                log_msg("PREDICTING:", other_pred, out_f=out_f)
             elif other_pred == -1:
-                print("PREDICTING:", pred)
+                log_msg("PREDICTING:", pred, out_f=out_f)
             else:
-                print("PREDICTING:", min(pred, other_pred))
+                log_msg("PREDICTING:", min(pred, other_pred), out_f=out_f)
         else:
             comb_q.put(pred)
         prev_input = next_input

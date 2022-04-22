@@ -836,7 +836,9 @@ int erase_all_blk_chl(int chl_id) {
     //printf("erase_all_blk_chl is called\n");	
     // read badblock bitmap
     //TODO update this!! 
-    badbin = (u16*)parse_read_file("bb_ben.bin", &file_len);	
+    char* path = concat(BLOCKFLEX_DIR, "bb_ben.bin");
+    badbin = (u16*)parse_read_file(path, &file_len);
+    free(path);	
     if(badbin == NULL) {
         printf("read file failed\n");
         return ERROR;
@@ -984,7 +986,9 @@ int erase_all_blk_chl_v_debug(int chl_id, vssd_t * v, int debug){
     //printf("erase_all_blk_chl is called\n");	
     // read badblock bitmap
     //TODO update this!! 
-    badbin = (u16*)parse_read_file("mark_toshA19.bin", &file_len);	
+    char* path = concat(BLOCKFLEX_DIR, "mark_toshA19.bin");
+    badbin = (u16*)parse_read_file(path, &file_len);	
+    free(path);
     if(badbin == NULL) {
         printf("read file failed\n");
         return ERROR;

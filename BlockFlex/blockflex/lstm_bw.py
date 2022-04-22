@@ -7,9 +7,10 @@ import math
 import mmap
 import os
 import time
+from macros import *
 
 DEVICE = torch.device("cpu")
-
+global out_f
 class LSTM(nn.Module):
     def __init__(self, input_size=1, hidden_layer_size=16, output_size=1):
         super().__init__()
@@ -36,7 +37,7 @@ class LSTM(nn.Module):
         return predictions[-1]
 
 
-fname = './bw_inputs.txt'
+fname = f'{BLOCKFLEX_DIR}/bw_inputs.txt'
 def get_inputs():
     cur_version = 0
     with open(fname, 'r') as fd:
@@ -47,7 +48,7 @@ def get_inputs():
             ret_inps = list(map(int, mm.read().decode("utf-8").strip().split()))
             if ret_inps[0] > cur_version and len(ret_inps) > 6:
                 cur_version = ret_inps[0]
-                #print(f"Starting Iteration: {cur_version}")
+                log_msg(f"Starting Iteration: {cur_version}", out_f=out_f)
                 yield ret_inps[1:]
             elif ret_inps[0] < 0:
                 mm.close()
@@ -112,7 +113,7 @@ def train_online(model, optimizer, loss_function, buf, bw_q):
             buf_score = int(math.ceil(tag_score * buf))
             if buf_score >= channels:
                 buf_score = channels-1
-            #print("Adding to bw q")
+            # print(f"Adding {buf_score} to bw q")
             bw_q.put(buf_score)
         total += 1
     return pred
@@ -142,8 +143,9 @@ iops_chl =  500000//16
 channel_bw = 64
 channels = 16
 
-def main(bw_q):
-
+def main(bw_q, f=None):
+    global out_f
+    out_f = f
     #init lstm
     model = LSTM(input_size=6, output_size=channels).to(DEVICE)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.005)

@@ -92,3 +92,4 @@ install: $(PROGRAMS)
 .PHONY: clean
 clean:
 	rm -f *.[od] $(PROGRAMS) iscsi/*.[od] ibmvio/*.[od] fc/*.[od]
+	rm -f start_log start_replay

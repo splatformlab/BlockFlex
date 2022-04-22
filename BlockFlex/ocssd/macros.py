@@ -6,6 +6,8 @@ import argparse
 import struct
 import codecs
 import time
+from collections import defaultdict
+import numpy as np
 # from colorama import Fore, Style
 
 KB = 1024
@@ -13,7 +15,8 @@ MB = 1024**2
 GB = 1024**3
 
 # Directories
-USR_DIR="/home/js39/software/ocssd/environment" #!!! CHANGE THIS PATH TO YOURS
+USR_DIR="/home/osdi22ae/BlockFlex/ocssd" # CHANGE THIS PATH 
+BLOCKFLEX_DIR="/home/osdi22ae/BlockFlex/blockflex" # CHANGE THIS PATH
 PFE_USR_DIR = os.path.join(USR_DIR, "iscsi") 
 IMG_DIR=os.path.join(USR_DIR, "imgs")
 PFE_LOG_DIR=os.path.join(USR_DIR, "logs")
@@ -36,21 +39,32 @@ DUMMY_DISK_SIZE_STRING="1T" # we present the virtual disk as 1TB
 esudo = "sudo env \"PATH=$PATH\""
 
 # Flags
-HARVEST_FLAG = "/home/js39/software/hs_js39/start_harvest"
+HARVEST_FLAG = f"{BLOCKFLEX_DIR}/start_harvest"
+END_FLAG = f"{BLOCKFLEX_DIR}/end_harvest"
 QUEUES = ["/dev/mqueue/harvest0", "/dev/mqueue/harvest1"]
 
 DEBUG = True
 VERBOSE = True
 
-def log_msg(*msg):
+def log_msg(*msg, out_f=None, emphasize=False, warning=False):
     '''
     Log a message with the current time stamp.
     '''
     msg = [str(_) for _ in msg]
-    if DEBUG:
-        print ("[%s] %s" % ((dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), " ".join(msg)))
+    out_str = "[%s] %s" % ((dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), " ".join(msg))
+    if emphasize:
+        out_str = bcolors.OKGREEN + out_str + bcolors.ENDC
+    if warning:
+        out_str = bcolors.WARNING + out_str + bcolors.ENDC
 
-def run_command(command_str, cwd=None, output=False, error=False, verbose=VERBOSE):
+    if DEBUG:
+        if out_f is not None:
+            print(out_str, file=out_f)
+            out_f.flush()
+        else:
+            print(out_str)
+
+def run_command(command_str, cwd=None, output=False, error=False, verbose=VERBOSE, suppress_output=False):
     if verbose:
         log_msg(command_str)
 
@@ -64,6 +78,9 @@ def run_command(command_str, cwd=None, output=False, error=False, verbose=VERBOS
     
     if output:
         f_args['stdout']=subprocess.PIPE
+
+    if suppress_output:
+        f_args['stdout']=subprocess.DEVNULL
     
     if error:
         f_args['stderr']=subprocess.PIPE
@@ -78,3 +95,14 @@ def run_command(command_str, cwd=None, output=False, error=False, verbose=VERBOS
         ret['stderr'] = result.stderr.decode("utf-8")
     
     return ret
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'

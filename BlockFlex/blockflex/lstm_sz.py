@@ -6,11 +6,12 @@ import mmap
 import os
 import time
 import math
+from macros import *
 
 DEVICE = torch.device("cpu")
 
 in_file = "NOT USING INPUT FILE"
-
+global out_f
 class LSTM(nn.Module):
     def __init__(self, input_size=1, hidden_layer_size=4, output_size=1):
         super().__init__()
@@ -37,7 +38,7 @@ class LSTM(nn.Module):
 
 
 def get_inputs():
-    fname = './sz_inputs.txt'
+    fname = f'{BLOCKFLEX_DIR}/sz_inputs.txt'
     cur_version = 0
     with open(fname, 'r') as fd:
         mm = mmap.mmap(fd.fileno(), 0, access=mmap.ACCESS_READ, offset=0)
@@ -47,7 +48,7 @@ def get_inputs():
             ret_inps = list(map(float, mm.read().decode("utf-8").strip().split()))
             if ret_inps[0] > cur_version and len(ret_inps) > 4:
                 cur_version = ret_inps[0]
-                #print(f"Starting Iteration: {cur_version}")
+                log_msg(f"Starting Iteration: {cur_version}", out_f=out_f)
                 yield ret_inps[1:]
             elif ret_inps[0] < 0:
                 mm.close()
@@ -142,8 +143,9 @@ sizes = 16
 window = 3
 MB = 1000000
 channel_bw = 64
-def main(sz_q):
-
+def main(sz_q, f=None):
+    global out_f
+    out_f = f
     buf = 1.05
 
     model = LSTM(input_size=4, output_size=sizes).to(DEVICE)

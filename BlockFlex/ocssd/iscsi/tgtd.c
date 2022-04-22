@@ -613,7 +613,15 @@ int main(int argc, char **argv)
 
 	struct mq_attr attr = {.mq_maxmsg=MAX_MSG, .mq_msgsize = MAX_MQUEUE_MSG_SIZE};
 	mqfd_0 = mq_open(QUEUE_NAME_0, O_WRONLY|O_CREAT, PMODE, &attr);
+	if(mqfd_0 == -1) {
+        perror("Parent mq_open failure");
+        exit(0);
+    }
 	mqfd_1 = mq_open(QUEUE_NAME_1, O_WRONLY|O_CREAT, PMODE, &attr);
+	if(mqfd_1 == -1) {
+        perror("Parent mq_open failure");
+        exit(0);
+    }
 
     ///////////////log for recording IO 
     //pfe_io_header_fd = open(header_fname, O_CREAT | O_TRUNC | O_WRONLY | O_APPEND);
