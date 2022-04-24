@@ -1,6 +1,6 @@
 # BlockFlex v1.0
 
-BlockFlex is out learning-based storage harvesting framework, which can harvest flash-based storage resources at fine-grained granularity in modern clould platforms.
+BlockFlex is our learning-based storage harvesting framework, which can harvest flash-based storage resources at fine-grained granularity in modern clould platforms.
 
 ## 1. Overview
 The following packages are necessary to install before running the following scripts. Please check our GitHub repo for the traces, code and scripts https://github.com/breidys2/BlockFlex.
